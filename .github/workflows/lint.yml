@@ -70,7 +70,7 @@ jobs:
         run: |
           ~/.composer/vendor/bin/phpcs \
             --report=checkstyle \
-            --runtime-set ignore_warnings_on_exit 1 \
+            --warning-severity=0 \
             -q | cs2pr
 
   phpmd:
