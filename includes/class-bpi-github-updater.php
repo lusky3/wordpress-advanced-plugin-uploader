@@ -344,7 +344,7 @@ class BPIGithubUpdater {
      * Parse optional metadata from the release body markdown.
      *
      * Supports lines like:
-     *   Tested up to: 6.7
+     *   Tested up to: 6.9
      *   Requires at least: 5.8
      *   Requires PHP: 8.2
      *
