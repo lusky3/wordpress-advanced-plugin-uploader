@@ -25,7 +25,6 @@
 			Disable the WordPress tabs requirement.
 		-->
 		<exclude name="Generic.WhiteSpace.DisallowSpaceIndent"/>
-		<exclude name="WordPress.WhiteSpace.PrecisionAlignment"/>
 
 		<!--
 			File naming: this project uses hyphenated class file names

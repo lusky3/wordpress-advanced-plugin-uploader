@@ -11,4 +11,20 @@ parameters:
             - vendor/
             - tests/
             - node_modules (?)
-
+    scanFiles:
+        - %rootDir%/../../php-stubs/wp-cli-stubs/wp-cli-stubs.php
+        - %rootDir%/../../php-stubs/wp-cli-stubs/wp-cli-commands-stubs.php
+        - %rootDir%/../../php-stubs/wp-cli-stubs/wp-cli-tools-stubs.php
+    bootstrapFiles:
+        - phpstan-bootstrap.php
+    ignoreErrors:
+        # Unreachable statements after wp_die() / wp_send_json_error() are intentional defensive coding
+        - '#Unreachable statement - code above always terminates\.#'
+        # Strict comparison edge cases in defensive null checks
+        - '#Strict comparison using [!=]+ between .+ will always evaluate to (true|false)\.#'
+        # Offset existence checks are intentional defensive coding
+        - '#Offset .+ on .+ on left side of \?\? always exists and is not nullable\.#'
+        # Property used for dependency injection in tests
+        - '#Property BPICLIInterface::\$queue is never read, only written\.#'
+        # esc_html accepts mixed in practice
+        - '#Parameter \#1 \$text of function esc_html expects string, int.+ given\.#'

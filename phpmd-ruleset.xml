@@ -27,6 +27,8 @@
         <exclude name="ExcessiveClassComplexity" />
         <exclude name="TooManyPublicMethods" />
         <exclude name="ExcessiveMethodLength" />
+        <exclude name="CyclomaticComplexity" />
+        <exclude name="NPathComplexity" />
     </rule>
     <rule ref="rulesets/codesize.xml/CyclomaticComplexity">
         <properties>

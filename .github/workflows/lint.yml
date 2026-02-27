@@ -145,7 +145,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Install PHPStan WordPress extension
-        run: composer require --dev szepeviktor/phpstan-wordpress --no-interaction
+        run: composer require --dev szepeviktor/phpstan-wordpress php-stubs/wp-cli-stubs --no-interaction
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --no-progress
