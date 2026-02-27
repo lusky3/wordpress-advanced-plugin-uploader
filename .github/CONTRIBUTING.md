@@ -22,10 +22,13 @@ We recommend enabling the following branch protection rules on `main`:
 
 1. Clone the repository
 2. Install dependencies:
+
    ```bash
    composer install
    ```
+
 3. Run the test suite:
+
    ```bash
    vendor/bin/phpunit
    ```
@@ -41,7 +44,7 @@ We recommend enabling the following branch protection rules on `main`:
 
 This project follows [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). Every commit message must be structured as:
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]
@@ -52,6 +55,7 @@ This project follows [Conventional Commits](https://www.conventionalcommits.org/
 Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `ci`, `build`, `chore`.
 
 Examples:
+
 - `feat: add batch rollback support`
 - `fix(uploader): handle empty ZIP files gracefully`
 - `test: add property tests for queue deduplication`
