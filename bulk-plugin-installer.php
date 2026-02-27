@@ -150,6 +150,10 @@ class BulkPluginInstaller {
         add_action( 'wp_ajax_bpi_get_log', array( $log_manager, 'handleGetLog' ) );
         add_action( 'wp_ajax_bpi_clear_log', array( $log_manager, 'handleClearLog' ) );
 
+        // GitHub update checker: notifies of new versions and shows changelog in Plugins UI.
+        $github_updater = new BPIGithubUpdater();
+        $github_updater->registerHooks();
+
         // Register network admin menu hook for multisite support.
         if ( function_exists( 'is_multisite' ) && is_multisite() ) {
             add_action( 'network_admin_menu', array( $this, 'registerNetworkAdminHooks' ) );

@@ -84,6 +84,11 @@ jobs:
             CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges -50)
           fi
 
+          # Extract metadata from readme.txt for the GitHub updater.
+          TESTED_UP_TO=$(grep -i "^Tested up to:" readme.txt | head -1 | sed 's/.*:\s*//')
+          REQUIRES_WP=$(grep -i "^Requires at least:" readme.txt | head -1 | sed 's/.*:\s*//')
+          REQUIRES_PHP=$(grep -i "^Requires PHP:" readme.txt | head -1 | sed 's/.*:\s*//')
+
           # Write to file for the release body
           {
             echo "## What's Changed"
@@ -91,6 +96,11 @@ jobs:
             echo "${CHANGELOG}"
             echo ""
             echo "---"
+            echo ""
+            echo "Tested up to: ${TESTED_UP_TO}"
+            echo "Requires at least: ${REQUIRES_WP}"
+            echo "Requires PHP: ${REQUIRES_PHP}"
+            echo ""
             echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${{ steps.version.outputs.tag }}"
           } > /tmp/changelog.md
 
