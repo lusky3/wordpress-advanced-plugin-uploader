@@ -112,6 +112,36 @@ class SummaryCountInvariantTest extends TestCase {
             }
         }
         $this->tempDirs = array();
+
+        // Clean up backup directories created by createBackup() during processBatch().
+        $backupBase = WP_CONTENT_DIR . '/bpi-backups';
+        if ( is_dir( $backupBase ) ) {
+            $this->recursiveDelete( $backupBase );
+        }
+    }
+
+    /**
+     * Recursively delete a directory.
+     *
+     * @param string $path Directory path.
+     */
+    private function recursiveDelete( string $path ): void {
+        if ( ! is_dir( $path ) ) {
+            return;
+        }
+        $items = scandir( $path );
+        foreach ( $items as $item ) {
+            if ( '.' === $item || '..' === $item ) {
+                continue;
+            }
+            $full = $path . DIRECTORY_SEPARATOR . $item;
+            if ( is_dir( $full ) ) {
+                $this->recursiveDelete( $full );
+            } else {
+                unlink( $full );
+            }
+        }
+        rmdir( $path );
     }
 
     /**

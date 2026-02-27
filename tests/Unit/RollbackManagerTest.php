@@ -47,6 +47,12 @@ class RollbackManagerTest extends TestCase {
      */
     protected function tearDown(): void {
         $this->recursiveDelete( $this->tmpDir );
+
+        // Clean up backup directories created by createBackup().
+        $backupBase = WP_CONTENT_DIR . '/bpi-backups';
+        if ( is_dir( $backupBase ) ) {
+            $this->recursiveDelete( $backupBase );
+        }
     }
 
     // ------------------------------------------------------------------

@@ -29,6 +29,9 @@ wp-config.php
 # Uploads
 /wp-content/uploads/
 
+# Plugin backup artifacts (created by tests and rollback manager)
+/wp-content/bpi-backups/
+
 # Log files
 *.log
 
