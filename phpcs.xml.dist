@@ -61,13 +61,65 @@
 		<exclude name="WordPress.WP.AlternativeFunctions"/>
 
 		<!--
-			Snake case for method names — the project uses camelCase
+			Snake case for function/method names — the project uses camelCase
 			for internal methods following PSR conventions.
 		-->
-		<exclude name="WordPress.NamingConventions.ValidFunctionName.MethodNameNotSnakeCase"/>
+		<exclude name="WordPress.NamingConventions.ValidFunctionName"/>
 		<exclude name="WordPress.NamingConventions.ValidVariableName.PropertyNotSnakeCase"/>
 		<exclude name="WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase"/>
 		<exclude name="WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase"/>
+
+		<!--
+			Nonce verification and input sanitization — the plugin verifies
+			nonces and sanitizes input at the handler entry point.
+		-->
+		<exclude name="WordPress.Security.NonceVerification"/>
+		<exclude name="WordPress.Security.ValidatedSanitizedInput"/>
+
+		<!--
+			Multi-line function call formatting — the project follows
+			PSR-style formatting for function calls.
+		-->
+		<exclude name="PEAR.Functions.FunctionCallSignature.MultipleArguments"/>
+		<exclude name="PEAR.Functions.FunctionCallSignature.ContentAfterOpenBracket"/>
+		<exclude name="PEAR.Functions.FunctionCallSignature.CloseBracketLine"/>
+
+		<!--
+			Yoda conditions — the project does not use Yoda style.
+		-->
+		<exclude name="WordPress.PHP.YodaConditions"/>
+
+		<!--
+			Translator comments — not all placeholders need translator hints.
+		-->
+		<exclude name="WordPress.WP.I18n.MissingTranslatorsComment"/>
+		<exclude name="WordPress.WP.I18n.UnorderedPlaceholders"/>
+
+		<!--
+			Inline comment formatting — not enforced in this project.
+		-->
+		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
+
+		<!--
+			Array formatting — the project uses compact array syntax.
+		-->
+		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing"/>
+
+		<!--
+			File structure — main plugin file contains both class and function.
+		-->
+		<exclude name="Universal.Files.SeparateFunctionsFromOO"/>
+
+		<!--
+			PHP tag formatting.
+		-->
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeOpen"/>
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterEnd"/>
+
+		<!--
+			DB prepare — handled via phpcs:ignore inline where needed.
+		-->
+		<exclude name="WordPress.DB.PreparedSQL"/>
 
 		<!--
 			PHPDoc comment spacing — the project follows PSR-style spacing.

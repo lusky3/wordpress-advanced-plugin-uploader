@@ -28,3 +28,5 @@ parameters:
         - '#Property BPICLIInterface::\$queue is never read, only written\.#'
         # esc_html accepts mixed in practice
         - '#Parameter \#1 \$text of function esc_html expects string, int.+ given\.#'
+        # Return type includes null for interface contract even if current implementation never returns null
+        - '#Method BPICLIInterface::\w+\(\) never returns null so it can be removed from the return type\.#'
