@@ -1,5 +1,5 @@
 {
-    "name": "bulk-plugin-installer/bulk-plugin-installer",
+    "name": "lusky3/bulk-plugin-installer",
     "description": "WordPress plugin for bulk uploading and installing multiple plugin ZIP files in a single operation.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",

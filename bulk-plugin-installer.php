@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name:       Bulk Plugin Installer
- * Plugin URI:        https://github.com/bulk-plugin-installer/bulk-plugin-installer
+ * Plugin URI:        https://github.com/lusky3/bulk-plugin-installer
  * Description:       Upload and install multiple WordPress plugin ZIP files in a single operation with preview, rollback, and profile support.
  * Version:           1.0.0
  * Requires at least: 5.8
  * Requires PHP:      8.2
- * Author:            Bulk Plugin Installer Contributors
- * Author URI:        https://github.com/bulk-plugin-installer
+ * Author:            Cody (lusky3) + Bulk Plugin Installer Contributors
+ * Author URI:        https://github.com/lusky3
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       bulk-plugin-installer

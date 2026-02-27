@@ -1,5 +1,5 @@
 === Bulk Plugin Installer ===
-Contributors: bulk-plugin-installer
+Contributors: lusky3
 Tags: bulk, plugin, installer, upload, batch
 Requires at least: 5.8
 Tested up to: 6.7
