@@ -118,8 +118,8 @@ class BulkPluginInstaller {
         $admin_page = new BPIAdminPage();
         $admin_page->registerHooks();
 
-        // Settings manager: registers settings page.
-        $settings_manager->registerSettings();
+        // Settings manager: registers settings page (must run on admin_init).
+        add_action( 'admin_init', array( $settings_manager, 'registerSettings' ) );
 
         // Bulk uploader: wp_ajax_bpi_upload.
         $bulk_uploader = new BPIBulkUploader();

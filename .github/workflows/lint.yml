@@ -7,12 +7,16 @@ on:
       - '**.php'
       - 'composer.*'
       - '.github/workflows/lint.yml'
+      - 'phpstan.neon'
+      - 'phpmd-ruleset.xml'
   pull_request:
     branches: [main]
     paths:
       - '**.php'
       - 'composer.*'
       - '.github/workflows/lint.yml'
+      - 'phpstan.neon'
+      - 'phpmd-ruleset.xml'
 
 jobs:
   phpcs:
@@ -48,6 +52,9 @@ jobs:
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
+
+      - name: Allow PHPCS Composer installer plugin globally
+        run: composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
 
       - name: Install PHPCS and WordPress standards
         run: |
@@ -103,8 +110,7 @@ jobs:
 
       - name: Run PHPMD
         run: |
-          phpmd includes/,bulk-plugin-installer.php text \
-            cleancode,codesize,controversial,design,naming,unusedcode
+          phpmd includes/,bulk-plugin-installer.php text phpmd-ruleset.xml
 
   phpstan:
     name: PHPStan (PHP ${{ matrix.php-version }})
@@ -122,7 +128,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
-          tools: phpstan, composer
+          tools: composer
           coverage: none
 
       - name: Get Composer cache directory
@@ -140,9 +146,8 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
+      - name: Install PHPStan WordPress extension
+        run: composer require --dev szepeviktor/phpstan-wordpress --no-interaction
+
       - name: Run PHPStan
-        run: |
-          phpstan analyse \
-            --level=5 \
-            --no-progress \
-            includes/ bulk-plugin-installer.php
+        run: vendor/bin/phpstan analyse --no-progress

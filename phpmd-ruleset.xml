@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<ruleset name="BPI Custom Rules"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0
+                             https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+
+    <description>
+        Custom PHPMD ruleset for Bulk Plugin Installer.
+        Excludes rules that conflict with WordPress coding conventions.
+    </description>
+
+    <!-- Clean Code -->
+    <rule ref="rulesets/cleancode.xml">
+        <!-- WordPress uses static methods (WP_CLI) and superglobals ($_POST, $_GET, $_FILES) -->
+        <exclude name="StaticAccess" />
+        <exclude name="Superglobals" />
+        <!-- WordPress convention uses else expressions -->
+        <exclude name="ElseExpression" />
+        <!-- WordPress doesn't use DI containers; direct instantiation is standard -->
+        <exclude name="MissingImport" />
+    </rule>
+
+    <!-- Code Size -->
+    <rule ref="rulesets/codesize.xml">
+        <exclude name="ExcessiveClassComplexity" />
+        <exclude name="TooManyPublicMethods" />
+    </rule>
+
+    <!-- Controversial -->
+    <rule ref="rulesets/controversial.xml">
+        <!-- WordPress uses snake_case, not camelCase -->
+        <exclude name="CamelCaseVariableName" />
+        <exclude name="CamelCaseParameterName" />
+        <exclude name="CamelCasePropertyName" />
+        <exclude name="CamelCaseMethodName" />
+    </rule>
+
+    <!-- Design -->
+    <rule ref="rulesets/design.xml">
+        <exclude name="CouplingBetweenObjects" />
+    </rule>
+
+    <!-- Naming -->
+    <rule ref="rulesets/naming.xml">
+        <exclude name="ShortVariable" />
+        <exclude name="LongVariable" />
+    </rule>
+
+    <!-- Unused Code -->
+    <rule ref="rulesets/unusedcode.xml" />
+
+</ruleset>
