@@ -16,6 +16,11 @@ use PHPUnit\Framework\TestCase;
  */
 class NotificationManagerTest extends TestCase {
 
+    private const ADMIN_EMAIL = 'admin@example.com';
+    private const DEV_EMAIL = 'dev@example.com';
+    private const PLUGIN_A = 'Plugin A';
+    private const PLUGIN_B = 'Plugin B';
+
     /**
      * @var BPINotificationManager
      */
@@ -39,7 +44,7 @@ class NotificationManagerTest extends TestCase {
         $bpi_test_current_user_login = 'admin';
 
         // Set a default admin email.
-        $bpi_test_options['admin_email'] = 'admin@example.com';
+        $bpi_test_options['admin_email'] = self::ADMIN_EMAIL;
 
         $this->settings = new BPISettingsManager();
         $this->manager  = new BPINotificationManager( $this->settings );
@@ -69,13 +74,13 @@ class NotificationManagerTest extends TestCase {
             'plugins'   => array(
                 array(
                     'slug'   => 'plugin-a',
-                    'name'   => 'Plugin A',
+                    'name'   => self::PLUGIN_A,
                     'action' => 'install',
                     'status' => 'success',
                 ),
                 array(
                     'slug'   => 'plugin-b',
-                    'name'   => 'Plugin B',
+                    'name'   => self::PLUGIN_B,
                     'action' => 'update',
                     'status' => 'failed',
                 ),
@@ -100,12 +105,12 @@ class NotificationManagerTest extends TestCase {
             'plugins'   => array(
                 array(
                     'slug'   => 'plugin-a',
-                    'name'   => 'Plugin A',
+                    'name'   => self::PLUGIN_A,
                     'status' => 'restored',
                 ),
                 array(
                     'slug'   => 'plugin-b',
-                    'name'   => 'Plugin B',
+                    'name'   => self::PLUGIN_B,
                     'status' => 'removed',
                 ),
             ),
@@ -145,30 +150,30 @@ class NotificationManagerTest extends TestCase {
     public function test_get_email_recipients_returns_admin_email(): void {
         $recipients = $this->manager->getEmailRecipients();
 
-        $this->assertContains( 'admin@example.com', $recipients );
+        $this->assertContains( self::ADMIN_EMAIL, $recipients );
     }
 
     public function test_get_email_recipients_includes_additional_recipients(): void {
         global $bpi_test_options;
-        $bpi_test_options['bpi_email_recipients'] = 'dev@example.com, ops@example.com';
+        $bpi_test_options['bpi_email_recipients'] = self::DEV_EMAIL . ', ops@example.com';
 
         $recipients = $this->manager->getEmailRecipients();
 
-        $this->assertContains( 'admin@example.com', $recipients );
-        $this->assertContains( 'dev@example.com', $recipients );
+        $this->assertContains( self::ADMIN_EMAIL, $recipients );
+        $this->assertContains( self::DEV_EMAIL, $recipients );
         $this->assertContains( 'ops@example.com', $recipients );
         $this->assertCount( 3, $recipients );
     }
 
     public function test_get_email_recipients_deduplicates_admin_email(): void {
         global $bpi_test_options;
-        $bpi_test_options['bpi_email_recipients'] = 'admin@example.com, dev@example.com';
+        $bpi_test_options['bpi_email_recipients'] = self::ADMIN_EMAIL . ', ' . self::DEV_EMAIL;
 
         $recipients = $this->manager->getEmailRecipients();
 
         $this->assertCount( 2, $recipients );
-        $this->assertContains( 'admin@example.com', $recipients );
-        $this->assertContains( 'dev@example.com', $recipients );
+        $this->assertContains( self::ADMIN_EMAIL, $recipients );
+        $this->assertContains( self::DEV_EMAIL, $recipients );
     }
 
     public function test_get_email_recipients_skips_invalid_emails(): void {
@@ -177,7 +182,7 @@ class NotificationManagerTest extends TestCase {
 
         $recipients = $this->manager->getEmailRecipients();
 
-        $this->assertContains( 'admin@example.com', $recipients );
+        $this->assertContains( self::ADMIN_EMAIL, $recipients );
         $this->assertContains( 'valid@example.com', $recipients );
         $this->assertContains( 'another@test.com', $recipients );
         $this->assertNotContains( 'not-an-email', $recipients );
@@ -247,8 +252,8 @@ class NotificationManagerTest extends TestCase {
         $this->manager->sendBatchEmail( $this->sampleBatchSummary() );
 
         $body = $bpi_test_emails[0]['message'];
-        $this->assertStringContainsString( 'Plugin A', $body );
-        $this->assertStringContainsString( 'Plugin B', $body );
+        $this->assertStringContainsString( self::PLUGIN_A, $body );
+        $this->assertStringContainsString( self::PLUGIN_B, $body );
     }
 
     public function test_send_batch_email_body_contains_per_plugin_outcome(): void {
@@ -277,13 +282,13 @@ class NotificationManagerTest extends TestCase {
     public function test_send_batch_email_sent_to_all_recipients(): void {
         global $bpi_test_emails, $bpi_test_options;
         $this->enableEmailNotifications();
-        $bpi_test_options['bpi_email_recipients'] = 'dev@example.com';
+        $bpi_test_options['bpi_email_recipients'] = self::DEV_EMAIL;
 
         $this->manager->sendBatchEmail( $this->sampleBatchSummary() );
 
         $to = $bpi_test_emails[0]['to'];
-        $this->assertContains( 'admin@example.com', $to );
-        $this->assertContains( 'dev@example.com', $to );
+        $this->assertContains( self::ADMIN_EMAIL, $to );
+        $this->assertContains( self::DEV_EMAIL, $to );
     }
 
     // ---------------------------------------------------------------
@@ -341,9 +346,9 @@ class NotificationManagerTest extends TestCase {
         $this->manager->sendRollbackEmail( $this->sampleRollbackSummary() );
 
         $body = $bpi_test_emails[0]['message'];
-        $this->assertStringContainsString( 'Plugin A', $body );
+        $this->assertStringContainsString( self::PLUGIN_A, $body );
         $this->assertStringContainsString( 'restored', $body );
-        $this->assertStringContainsString( 'Plugin B', $body );
+        $this->assertStringContainsString( self::PLUGIN_B, $body );
         $this->assertStringContainsString( 'removed', $body );
     }
 

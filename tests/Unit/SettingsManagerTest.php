@@ -15,6 +15,8 @@ use PHPUnit\Framework\TestCase;
  */
 class SettingsManagerTest extends TestCase {
 
+    private const PLUGIN_NAME = 'Test Plugin';
+
     /**
      * The Settings Manager instance under test.
      *
@@ -286,7 +288,7 @@ class SettingsManagerTest extends TestCase {
             'bpi_email_recipients'   => '',
         );
 
-        $result = $this->settingsManager->sanitizeSettings( $input );
+        $this->settingsManager->sanitizeSettings( $input );
 
         $this->assertNotEmpty( $bpi_test_settings_errors );
         $this->assertSame( 'bpi_invalid_max_plugins', $bpi_test_settings_errors[0]['code'] );
@@ -305,7 +307,7 @@ class SettingsManagerTest extends TestCase {
             'bpi_email_recipients'   => '',
         );
 
-        $result = $this->settingsManager->sanitizeSettings( $input );
+        $this->settingsManager->sanitizeSettings( $input );
 
         $this->assertNotEmpty( $bpi_test_settings_errors );
         $error_codes = array_column( $bpi_test_settings_errors, 'code' );
@@ -325,7 +327,7 @@ class SettingsManagerTest extends TestCase {
             'bpi_email_recipients'   => '',
         );
 
-        $result = $this->settingsManager->sanitizeSettings( $input );
+        $this->settingsManager->sanitizeSettings( $input );
 
         $error_codes = array_column( $bpi_test_settings_errors, 'code' );
         $this->assertContains( 'bpi_invalid_max_file_size', $error_codes );
@@ -384,7 +386,7 @@ class SettingsManagerTest extends TestCase {
             'bpi_email_recipients'   => 'valid@example.com, not-an-email, also@bad',
         );
 
-        $result = $this->settingsManager->sanitizeSettings( $input );
+        $this->settingsManager->sanitizeSettings( $input );
 
         $error_codes = array_column( $bpi_test_settings_errors, 'code' );
         $this->assertContains( 'bpi_invalid_email_recipients', $error_codes );
@@ -557,7 +559,7 @@ class SettingsManagerTest extends TestCase {
         $logManager = new \BPILogManager();
         $logManager->log( 'install', array(
             'plugin_slug' => 'test-plugin',
-            'plugin_name' => 'Test Plugin',
+            'plugin_name' => self::PLUGIN_NAME,
             'status'      => 'success',
             'message'     => 'Installed successfully.',
         ) );
@@ -566,7 +568,7 @@ class SettingsManagerTest extends TestCase {
         $this->settingsManager->renderSettingsPage();
         $output = ob_get_clean();
 
-        $this->assertStringContainsString( 'Test Plugin', $output );
+        $this->assertStringContainsString( self::PLUGIN_NAME, $output );
         $this->assertStringContainsString( 'success', $output );
         $this->assertStringContainsString( 'Clear Log', $output );
     }
@@ -578,7 +580,7 @@ class SettingsManagerTest extends TestCase {
         $logManager = new \BPILogManager();
         $logManager->log( 'dry_run', array(
             'plugin_slug' => 'test-plugin',
-            'plugin_name' => 'Test Plugin',
+            'plugin_name' => self::PLUGIN_NAME,
             'status'      => 'success',
             'is_dry_run'  => true,
         ) );

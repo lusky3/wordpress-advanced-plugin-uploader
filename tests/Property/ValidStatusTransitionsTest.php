@@ -243,7 +243,7 @@ class ValidStatusTransitionsTest extends TestCase {
                 $this->processor->processBatch( $plugins );
 
                 // Every plugin should have had the upgrader called.
-                foreach ( $plugins as $idx => $plugin ) {
+                foreach ( $plugins as $plugin ) {
                     $slug = $plugin['slug'];
                     $this->assertArrayHasKey(
                         $slug,
@@ -283,15 +283,15 @@ class ValidStatusTransitionsTest extends TestCase {
 
                 $results = $this->processor->processBatch( $plugins, true );
 
-                foreach ( $results as $idx => $result ) {
+                foreach ( $results as $result ) {
                     $this->assertSame(
                         'success',
                         $result['status'],
-                        "Dry run plugin at index $idx should have status 'success'."
+                        "Dry run plugin '{$result['slug']}' should have status 'success'."
                     );
                     $this->assertTrue(
                         $result['is_dry_run'] ?? false,
-                        "Dry run plugin at index $idx should have is_dry_run=true."
+                        "Dry run plugin '{$result['slug']}' should have is_dry_run=true."
                     );
                 }
 

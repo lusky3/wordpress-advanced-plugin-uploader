@@ -16,6 +16,11 @@ use PHPUnit\Framework\TestCase;
  */
 class QueueManagerTest extends TestCase {
 
+    private const VERSION_100 = '1.0.0';
+    private const VERSION_200 = '2.0.0';
+    private const PATH_A_ZIP = '/tmp/a.zip';
+    private const PATH_B_ZIP = '/tmp/b.zip';
+
     /**
      * The queue manager instance under test.
      *
@@ -118,15 +123,15 @@ class QueueManagerTest extends TestCase {
         $this->assertSame( 'test-plugin.zip', $item['file_name'] );
         $this->assertSame( 5000, $item['file_size'] );
         $this->assertSame( 'Test Plugin', $item['plugin_name'] );
-        $this->assertSame( '1.0.0', $item['plugin_version'] );
+        $this->assertSame( self::VERSION_100, $item['plugin_version'] );
         $this->assertSame( 'Test Author', $item['plugin_author'] );
         $this->assertSame( 'install', $item['action'] );
         $this->assertArrayHasKey( 'added_at', $item );
     }
 
     public function test_add_multiple_items(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a', 1000 ) );
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b', 2000 ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a', 1000 ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b', 2000 ) );
         $this->queue->add( '/tmp/c.zip', $this->makePluginData( 'plugin-c', 3000 ) );
 
         $this->assertSame( 3, $this->queue->getCount() );
@@ -137,22 +142,22 @@ class QueueManagerTest extends TestCase {
     // ---------------------------------------------------------------
 
     public function test_add_deduplicates_by_slug(): void {
-        $this->queue->add( '/tmp/v1.zip', $this->makePluginData( 'my-plugin', 1000, array( 'plugin_version' => '1.0.0' ) ) );
-        $this->queue->add( '/tmp/v2.zip', $this->makePluginData( 'my-plugin', 2000, array( 'plugin_version' => '2.0.0' ) ) );
+        $this->queue->add( '/tmp/v1.zip', $this->makePluginData( 'my-plugin', 1000, array( 'plugin_version' => self::VERSION_100 ) ) );
+        $this->queue->add( '/tmp/v2.zip', $this->makePluginData( 'my-plugin', 2000, array( 'plugin_version' => self::VERSION_200 ) ) );
 
         $this->assertSame( 1, $this->queue->getCount() );
 
         $items = $this->queue->getAll();
-        $this->assertSame( '2.0.0', $items[0]['plugin_version'] );
+        $this->assertSame( self::VERSION_200, $items[0]['plugin_version'] );
         $this->assertSame( 2000, $items[0]['file_size'] );
     }
 
     public function test_add_duplicate_preserves_other_items(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a', 1000 ) );
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b', 2000 ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a', 1000 ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b', 2000 ) );
 
         // Add duplicate of plugin-a.
-        $this->queue->add( '/tmp/a-v2.zip', $this->makePluginData( 'plugin-a', 1500, array( 'plugin_version' => '2.0.0' ) ) );
+        $this->queue->add( '/tmp/a-v2.zip', $this->makePluginData( 'plugin-a', 1500, array( 'plugin_version' => self::VERSION_200 ) ) );
 
         $this->assertSame( 2, $this->queue->getCount() );
 
@@ -162,13 +167,13 @@ class QueueManagerTest extends TestCase {
     }
 
     public function test_has_duplicate_returns_true_for_existing_slug(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a' ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a' ) );
 
         $this->assertTrue( $this->queue->hasDuplicate( 'plugin-a' ) );
     }
 
     public function test_has_duplicate_returns_false_for_missing_slug(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a' ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a' ) );
 
         $this->assertFalse( $this->queue->hasDuplicate( 'plugin-b' ) );
     }
@@ -182,8 +187,8 @@ class QueueManagerTest extends TestCase {
     // ---------------------------------------------------------------
 
     public function test_remove_existing_item(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a' ) );
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b' ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a' ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b' ) );
 
         $result = $this->queue->remove( 'plugin-a' );
 
@@ -194,7 +199,7 @@ class QueueManagerTest extends TestCase {
     }
 
     public function test_remove_nonexistent_item_returns_false(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a' ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a' ) );
 
         $result = $this->queue->remove( 'nonexistent' );
 
@@ -205,7 +210,7 @@ class QueueManagerTest extends TestCase {
     public function test_remove_last_item_deletes_transient(): void {
         global $bpi_test_transients;
 
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a' ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a' ) );
         $this->queue->remove( 'plugin-a' );
 
         $this->assertSame( 0, $this->queue->getCount() );
@@ -221,8 +226,8 @@ class QueueManagerTest extends TestCase {
     }
 
     public function test_get_all_returns_all_items(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a' ) );
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b' ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a' ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b' ) );
 
         $items = $this->queue->getAll();
         $this->assertCount( 2, $items );
@@ -233,8 +238,8 @@ class QueueManagerTest extends TestCase {
     // ---------------------------------------------------------------
 
     public function test_clear_removes_all_items(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a' ) );
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b' ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a' ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b' ) );
 
         $this->queue->clear();
 
@@ -256,10 +261,10 @@ class QueueManagerTest extends TestCase {
     }
 
     public function test_get_count_reflects_additions(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a' ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a' ) );
         $this->assertSame( 1, $this->queue->getCount() );
 
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b' ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b' ) );
         $this->assertSame( 2, $this->queue->getCount() );
     }
 
@@ -272,16 +277,16 @@ class QueueManagerTest extends TestCase {
     }
 
     public function test_get_total_size_sums_all_file_sizes(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a', 1000 ) );
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b', 2500 ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a', 1000 ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b', 2500 ) );
         $this->queue->add( '/tmp/c.zip', $this->makePluginData( 'plugin-c', 500 ) );
 
         $this->assertSame( 4000, $this->queue->getTotalSize() );
     }
 
     public function test_get_total_size_updates_after_removal(): void {
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a', 1000 ) );
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b', 2000 ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a', 1000 ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b', 2000 ) );
 
         $this->queue->remove( 'plugin-a' );
 
@@ -296,12 +301,12 @@ class QueueManagerTest extends TestCase {
         global $bpi_test_current_user_id;
 
         $bpi_test_current_user_id = 1;
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a' ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a' ) );
 
         $bpi_test_current_user_id = 2;
         $this->assertSame( 0, $this->queue->getCount() );
 
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b' ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b' ) );
         $this->assertSame( 1, $this->queue->getCount() );
 
         // Switch back to user 1.
@@ -380,8 +385,8 @@ class QueueManagerTest extends TestCase {
     public function test_handle_queue_remove_successfully_removes_item(): void {
         global $bpi_test_json_responses;
 
-        $this->queue->add( '/tmp/a.zip', $this->makePluginData( 'plugin-a', 1000 ) );
-        $this->queue->add( '/tmp/b.zip', $this->makePluginData( 'plugin-b', 2000 ) );
+        $this->queue->add( self::PATH_A_ZIP, $this->makePluginData( 'plugin-a', 1000 ) );
+        $this->queue->add( self::PATH_B_ZIP, $this->makePluginData( 'plugin-b', 2000 ) );
 
         $_POST['_wpnonce'] = 'valid';
         $_POST['slug']     = 'plugin-a';

@@ -18,35 +18,35 @@ $bpi_test_options = array();
 $wpdb = new class {
     public string $options = 'wp_options';
     public string $prefix  = 'wp_';
-    public string $charset_collate = 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
+    public string $charset_collate = 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'; // NOSONAR
 
     /**
      * In-memory storage for log entries (simulates the bpi_log table).
      *
      * @var array
      */
-    public array $bpi_log_rows = array();
+    public array $bpi_log_rows = array(); // NOSONAR
 
     /**
      * Auto-increment counter for log entry IDs.
      *
      * @var int
      */
-    public int $bpi_log_next_id = 1;
+    public int $bpi_log_next_id = 1; // NOSONAR
 
     /**
      * Last insert ID.
      *
      * @var int
      */
-    public int $insert_id = 0;
+    public int $insert_id = 0; // NOSONAR
 
     /**
      * Whether the log table has been "created".
      *
      * @var bool
      */
-    public bool $bpi_log_table_exists = false;
+    public bool $bpi_log_table_exists = false; // NOSONAR
 
     /**
      * @param string $query SQL query.
@@ -79,7 +79,7 @@ $wpdb = new class {
      * @param array  $format Data format.
      * @return int|false Number of rows inserted or false on error.
      */
-    public function insert( string $table, array $data, $format = null ) {
+    public function insert( string $table, array $data, $format = null ) { // NOSONAR
         if ( str_contains( $table, 'bpi_log' ) ) {
             $data['id']        = $this->bpi_log_next_id++;
             $this->insert_id   = $data['id'];
@@ -96,7 +96,7 @@ $wpdb = new class {
      * @param string $output Output type.
      * @return array|null Results.
      */
-    public function get_results( string $query, $output = 'OBJECT' ) {
+    public function get_results( string $query, $output = 'OBJECT' ) { // NOSONAR
         if ( str_contains( $query, 'bpi_log' ) ) {
             $rows = $this->bpi_log_rows;
 
@@ -155,14 +155,14 @@ $wpdb = new class {
      *
      * @return string
      */
-    public function get_charset_collate(): string {
+    public function get_charset_collate(): string { // NOSONAR
         return $this->charset_collate;
     }
 
     /**
      * Reset the log table state (useful in tests).
      */
-    public function reset_bpi_log(): void {
+    public function reset_bpi_log(): void { // NOSONAR
         $this->bpi_log_rows        = array();
         $this->bpi_log_next_id     = 1;
         $this->insert_id           = 0;
@@ -171,19 +171,19 @@ $wpdb = new class {
 };
 
 if ( ! function_exists( 'plugin_dir_path' ) ) {
-    function plugin_dir_path( string $file ): string {
+    function plugin_dir_path( string $file ): string { // NOSONAR
         return trailingslashit( dirname( $file ) );
     }
 }
 
 if ( ! function_exists( 'plugin_dir_url' ) ) {
-    function plugin_dir_url( string $file ): string {
+    function plugin_dir_url( string $file ): string { // NOSONAR
         return 'https://example.com/wp-content/plugins/' . basename( dirname( $file ) ) . '/';
     }
 }
 
 if ( ! function_exists( 'plugin_basename' ) ) {
-    function plugin_basename( string $file ): string {
+    function plugin_basename( string $file ): string { // NOSONAR
         return basename( dirname( $file ) ) . '/' . basename( $file );
     }
 }
@@ -195,7 +195,7 @@ if ( ! function_exists( 'trailingslashit' ) ) {
 }
 
 if ( ! function_exists( 'add_action' ) ) {
-    function add_action( string $hook, $callback, int $priority = 10, int $accepted_args = 1 ): void {
+    function add_action( string $hook, $callback, int $priority = 10, int $accepted_args = 1 ): void { // NOSONAR
         global $bpi_test_hooks;
         $bpi_test_hooks[] = array(
             'type'     => 'action',
@@ -207,7 +207,7 @@ if ( ! function_exists( 'add_action' ) ) {
 }
 
 if ( ! function_exists( 'register_activation_hook' ) ) {
-    function register_activation_hook( string $file, $callback ): void {
+    function register_activation_hook( string $file, $callback ): void { // NOSONAR
         global $bpi_test_hooks;
         $bpi_test_hooks[] = array(
             'type'     => 'activation',
@@ -218,7 +218,7 @@ if ( ! function_exists( 'register_activation_hook' ) ) {
 }
 
 if ( ! function_exists( 'register_deactivation_hook' ) ) {
-    function register_deactivation_hook( string $file, $callback ): void {
+    function register_deactivation_hook( string $file, $callback ): void { // NOSONAR
         global $bpi_test_hooks;
         $bpi_test_hooks[] = array(
             'type'     => 'deactivation',
@@ -229,7 +229,7 @@ if ( ! function_exists( 'register_deactivation_hook' ) ) {
 }
 
 if ( ! function_exists( 'load_plugin_textdomain' ) ) {
-    function load_plugin_textdomain( string $domain, $_deprecated = false, string $plugin_rel_path = '' ): bool {
+    function load_plugin_textdomain( string $domain, $_deprecated = false, string $plugin_rel_path = '' ): bool { // NOSONAR
         global $bpi_test_hooks;
         $bpi_test_hooks[] = array(
             'type'   => 'textdomain',
@@ -241,14 +241,14 @@ if ( ! function_exists( 'load_plugin_textdomain' ) ) {
 }
 
 if ( ! function_exists( 'get_option' ) ) {
-    function get_option( string $option, $default = false ) {
+    function get_option( string $option, $default = false ) { // NOSONAR
         global $bpi_test_options;
         return array_key_exists( $option, $bpi_test_options ) ? $bpi_test_options[ $option ] : $default;
     }
 }
 
 if ( ! function_exists( 'add_option' ) ) {
-    function add_option( string $option, $value = '' ): bool {
+    function add_option( string $option, $value = '' ): bool { // NOSONAR
         global $bpi_test_options;
         if ( ! array_key_exists( $option, $bpi_test_options ) ) {
             $bpi_test_options[ $option ] = $value;
@@ -259,7 +259,7 @@ if ( ! function_exists( 'add_option' ) ) {
 }
 
 if ( ! function_exists( 'update_option' ) ) {
-    function update_option( string $option, $value ): bool {
+    function update_option( string $option, $value ): bool { // NOSONAR
         global $bpi_test_options;
         $bpi_test_options[ $option ] = $value;
         return true;
@@ -267,7 +267,7 @@ if ( ! function_exists( 'update_option' ) ) {
 }
 
 if ( ! function_exists( 'delete_option' ) ) {
-    function delete_option( string $option ): bool {
+    function delete_option( string $option ): bool { // NOSONAR
         global $bpi_test_options;
         if ( array_key_exists( $option, $bpi_test_options ) ) {
             unset( $bpi_test_options[ $option ] );
@@ -278,25 +278,25 @@ if ( ! function_exists( 'delete_option' ) ) {
 }
 
 if ( ! function_exists( '__' ) ) {
-    function __( string $text, string $domain = 'default' ): string {
+    function __( string $text, string $domain = 'default' ): string { // NOSONAR
         return $text;
     }
 }
 
 if ( ! function_exists( '_e' ) ) {
-    function _e( string $text, string $domain = 'default' ): void {
+    function _e( string $text, string $domain = 'default' ): void { // NOSONAR
         echo $text;
     }
 }
 
 if ( ! function_exists( 'esc_html__' ) ) {
-    function esc_html__( string $text, string $domain = 'default' ): string {
+    function esc_html__( string $text, string $domain = 'default' ): string { // NOSONAR
         return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
     }
 }
 
 if ( ! function_exists( 'esc_html_e' ) ) {
-    function esc_html_e( string $text, string $domain = 'default' ): void {
+    function esc_html_e( string $text, string $domain = 'default' ): void { // NOSONAR
         echo esc_html__( $text, $domain );
     }
 }
@@ -307,7 +307,7 @@ if ( ! function_exists( 'get_current_user_id' ) ) {
      *
      * @return int Current user ID (defaults to 1 for tests).
      */
-    function get_current_user_id(): int {
+    function get_current_user_id(): int { // NOSONAR
         global $bpi_test_current_user_id;
         return $bpi_test_current_user_id ?? 1;
     }
@@ -320,7 +320,7 @@ if ( ! function_exists( 'current_time' ) ) {
      * @param string $type Type of time to return.
      * @return string Current time in MySQL format.
      */
-    function current_time( string $type = 'mysql' ): string {
+    function current_time( string $type = 'mysql' ): string { // NOSONAR
         return gmdate( 'Y-m-d H:i:s' );
     }
 }
@@ -333,7 +333,7 @@ if ( ! function_exists( 'dbDelta' ) ) {
      * @param bool         $execute Whether to execute.
      * @return array Results.
      */
-    function dbDelta( $queries = '', bool $_execute = true ): array {
+    function dbDelta( $queries = '', bool $_execute = true ): array { // NOSONAR
         global $wpdb;
         $wpdb->bpi_log_table_exists = true;
         return array();
@@ -351,7 +351,7 @@ $bpi_test_options_pages       = array();
 $bpi_test_settings_errors     = array();
 
 if ( ! function_exists( 'register_setting' ) ) {
-    function register_setting( string $option_group, string $option_name, $args = array() ): void {
+    function register_setting( string $option_group, string $option_name, $args = array() ): void { // NOSONAR
         global $bpi_test_registered_settings;
         $bpi_test_registered_settings[ $option_name ] = array(
             'group' => $option_group,
@@ -362,7 +362,7 @@ if ( ! function_exists( 'register_setting' ) ) {
 }
 
 if ( ! function_exists( 'add_settings_section' ) ) {
-    function add_settings_section( string $id, string $title, $callback, string $page, $args = array() ): void {
+    function add_settings_section( string $id, string $title, $callback, string $page, $args = array() ): void { // NOSONAR
         global $bpi_test_settings_sections;
         $bpi_test_settings_sections[ $id ] = array(
             'id'       => $id,
@@ -375,7 +375,7 @@ if ( ! function_exists( 'add_settings_section' ) ) {
 }
 
 if ( ! function_exists( 'add_settings_field' ) ) {
-    function add_settings_field( string $id, string $title, $callback, string $page, string $section = 'default', $args = array() ): void {
+    function add_settings_field( string $id, string $title, $callback, string $page, string $section = 'default', $args = array() ): void { // NOSONAR
         global $bpi_test_settings_fields;
         $bpi_test_settings_fields[ $id ] = array(
             'id'       => $id,
@@ -389,7 +389,7 @@ if ( ! function_exists( 'add_settings_field' ) ) {
 }
 
 if ( ! function_exists( 'add_options_page' ) ) {
-    function add_options_page( string $page_title, string $menu_title, string $capability, string $menu_slug, $callback = '', int $position = null ): string {
+    function add_options_page( string $page_title, string $menu_title, string $capability, string $menu_slug, $callback = '', int $position = null ): string { // NOSONAR
         global $bpi_test_options_pages;
         $bpi_test_options_pages[ $menu_slug ] = array(
             'page_title' => $page_title,
@@ -404,25 +404,25 @@ if ( ! function_exists( 'add_options_page' ) ) {
 }
 
 if ( ! function_exists( 'settings_fields' ) ) {
-    function settings_fields( string $option_group ): void {
+    function settings_fields( string $option_group ): void { // NOSONAR
         echo '<input type="hidden" name="option_page" value="' . htmlspecialchars( $option_group ) . '" />';
     }
 }
 
 if ( ! function_exists( 'do_settings_sections' ) ) {
-    function do_settings_sections( string $page ): void {
+    function do_settings_sections( string $page ): void { // NOSONAR
         echo '<!-- settings sections for ' . htmlspecialchars( $page ) . ' -->';
     }
 }
 
 if ( ! function_exists( 'submit_button' ) ) {
-    function submit_button( string $text = 'Save Changes', string $type = 'primary', string $name = 'submit', bool $wrap = true, $other_attributes = null ): void {
+    function submit_button( string $text = 'Save Changes', string $type = 'primary', string $name = 'submit', bool $wrap = true, $other_attributes = null ): void { // NOSONAR
         echo '<input type="submit" name="' . htmlspecialchars( $name ) . '" class="button button-' . htmlspecialchars( $type ) . '" value="' . htmlspecialchars( $text ) . '" />';
     }
 }
 
 if ( ! function_exists( 'add_settings_error' ) ) {
-    function add_settings_error( string $setting, string $code, string $message, string $type = 'error' ): void {
+    function add_settings_error( string $setting, string $code, string $message, string $type = 'error' ): void { // NOSONAR
         global $bpi_test_settings_errors;
         $bpi_test_settings_errors[] = array(
             'setting' => $setting,
@@ -434,25 +434,25 @@ if ( ! function_exists( 'add_settings_error' ) ) {
 }
 
 if ( ! function_exists( 'esc_attr' ) ) {
-    function esc_attr( string $text ): string {
+    function esc_attr( string $text ): string { // NOSONAR
         return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
     }
 }
 
 if ( ! function_exists( 'esc_html' ) ) {
-    function esc_html( string $text ): string {
+    function esc_html( string $text ): string { // NOSONAR
         return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
     }
 }
 
 if ( ! function_exists( 'esc_url' ) ) {
-    function esc_url( string $url ): string {
+    function esc_url( string $url ): string { // NOSONAR
         return filter_var( $url, FILTER_SANITIZE_URL ) ?: '';
     }
 }
 
 if ( ! function_exists( 'wp_nonce_field' ) ) {
-    function wp_nonce_field( $action = -1, string $name = '_wpnonce', bool $referer = true, bool $display = true ): string {
+    function wp_nonce_field( $action = -1, string $name = '_wpnonce', bool $referer = true, bool $display = true ): string { // NOSONAR
         $field = '<input type="hidden" name="' . htmlspecialchars( $name ) . '" value="nonce_' . htmlspecialchars( (string) $action ) . '" />';
         if ( $display ) {
             echo $field;
@@ -462,13 +462,13 @@ if ( ! function_exists( 'wp_nonce_field' ) ) {
 }
 
 if ( ! function_exists( 'wp_create_nonce' ) ) {
-    function wp_create_nonce( $action = -1 ): string {
+    function wp_create_nonce( $action = -1 ): string { // NOSONAR
         return 'nonce_' . (string) $action;
     }
 }
 
 if ( ! function_exists( 'admin_url' ) ) {
-    function admin_url( string $path = '' ): string {
+    function admin_url( string $path = '' ): string { // NOSONAR
         return 'https://example.com/wp-admin/' . ltrim( $path, '/' );
     }
 }
@@ -494,19 +494,19 @@ if ( ! function_exists( 'selected' ) ) {
 }
 
 if ( ! function_exists( 'sanitize_email' ) ) {
-    function sanitize_email( string $email ): string {
+    function sanitize_email( string $email ): string { // NOSONAR
         return filter_var( trim( $email ), FILTER_VALIDATE_EMAIL ) ? trim( $email ) : '';
     }
 }
 
 if ( ! function_exists( 'is_email' ) ) {
-    function is_email( string $email ): bool {
+    function is_email( string $email ): bool { // NOSONAR
         return (bool) filter_var( trim( $email ), FILTER_VALIDATE_EMAIL );
     }
 }
 
 if ( ! function_exists( 'wp_kses_post' ) ) {
-    function wp_kses_post( string $data ): string {
+    function wp_kses_post( string $data ): string { // NOSONAR
         return strip_tags( $data, '<a><strong><em><br><p><span>' );
     }
 }
@@ -518,7 +518,7 @@ if ( ! function_exists( 'sanitize_text_field' ) ) {
      * @param string $str String to sanitize.
      * @return string Sanitized string.
      */
-    function sanitize_text_field( string $str ): string {
+    function sanitize_text_field( string $str ): string { // NOSONAR
         return trim( strip_tags( $str ) );
     }
 }
@@ -541,7 +541,7 @@ if ( ! class_exists( 'WP_Error' ) ) {
     /**
      * Minimal WP_Error stub for unit testing.
      */
-    class WP_Error {
+    class WP_Error { // NOSONAR
         /**
          * Error codes and messages.
          *
@@ -554,7 +554,7 @@ if ( ! class_exists( 'WP_Error' ) ) {
          *
          * @var array
          */
-        private array $error_data = array();
+        private array $error_data = array(); // NOSONAR
 
         /**
          * Constructor.
@@ -577,7 +577,7 @@ if ( ! class_exists( 'WP_Error' ) ) {
          *
          * @return string|int Error code or empty string.
          */
-        public function get_error_code() {
+        public function get_error_code() { // NOSONAR
             $codes = array_keys( $this->errors );
             return ! empty( $codes ) ? $codes[0] : '';
         }
@@ -588,7 +588,7 @@ if ( ! class_exists( 'WP_Error' ) ) {
          * @param string $code Optional error code.
          * @return string Error message.
          */
-        public function get_error_message( string $code = '' ): string {
+        public function get_error_message( string $code = '' ): string { // NOSONAR
             if ( '' === $code ) {
                 $code = $this->get_error_code();
             }
@@ -601,7 +601,7 @@ if ( ! class_exists( 'WP_Error' ) ) {
          * @param string $code Optional error code.
          * @return array Error messages.
          */
-        public function get_error_messages( string $code = '' ): array {
+        public function get_error_messages( string $code = '' ): array { // NOSONAR
             if ( '' === $code ) {
                 $all = array();
                 foreach ( $this->errors as $messages ) {
@@ -618,7 +618,7 @@ if ( ! class_exists( 'WP_Error' ) ) {
          * @param string $code Optional error code.
          * @return mixed Error data.
          */
-        public function get_error_data( string $code = '' ) {
+        public function get_error_data( string $code = '' ) { // NOSONAR
             if ( '' === $code ) {
                 $code = $this->get_error_code();
             }
@@ -644,7 +644,7 @@ if ( ! class_exists( 'WP_Error' ) ) {
          *
          * @return bool True if errors exist.
          */
-        public function has_errors(): bool {
+        public function has_errors(): bool { // NOSONAR
             return ! empty( $this->errors );
         }
     }
@@ -657,7 +657,7 @@ if ( ! function_exists( 'is_wp_error' ) ) {
      * @param mixed $thing Value to check.
      * @return bool True if WP_Error.
      */
-    function is_wp_error( $thing ): bool {
+    function is_wp_error( $thing ): bool { // NOSONAR
         return $thing instanceof WP_Error;
     }
 }
@@ -678,7 +678,7 @@ if ( ! function_exists( 'wp_verify_nonce' ) ) {
      * @param string $action Action name.
      * @return false|int False if invalid, 1 or 2 if valid.
      */
-    function wp_verify_nonce( $nonce, $action = -1 ) {
+    function wp_verify_nonce( $nonce, $action = -1 ) { // NOSONAR
         global $bpi_test_nonce_valid;
         return $bpi_test_nonce_valid ? 1 : false;
     }
@@ -691,7 +691,7 @@ if ( ! function_exists( 'current_user_can' ) ) {
      * @param string $capability Capability to check.
      * @return bool Whether the user has the capability.
      */
-    function current_user_can( string $capability ): bool {
+    function current_user_can( string $capability ): bool { // NOSONAR
         global $bpi_test_user_can;
         if ( is_array( $bpi_test_user_can ) ) {
             return $bpi_test_user_can[ $capability ] ?? false;
@@ -707,7 +707,7 @@ if ( ! function_exists( 'wp_send_json_error' ) ) {
      * @param mixed $data   Response data.
      * @param int   $status HTTP status code.
      */
-    function wp_send_json_error( $data = null, int $status = 200 ): void {
+    function wp_send_json_error( $data = null, int $status = 200 ): void { // NOSONAR
         global $bpi_test_json_responses;
         $bpi_test_json_responses[] = array(
             'success' => false,
@@ -724,7 +724,7 @@ if ( ! function_exists( 'wp_send_json_success' ) ) {
      * @param mixed $data   Response data.
      * @param int   $status HTTP status code.
      */
-    function wp_send_json_success( $data = null, int $status = 200 ): void {
+    function wp_send_json_success( $data = null, int $status = 200 ): void { // NOSONAR
         global $bpi_test_json_responses;
         $bpi_test_json_responses[] = array(
             'success' => true,
@@ -741,7 +741,7 @@ if ( ! function_exists( 'wp_unslash' ) ) {
      * @param string|array $value String or array to unslash.
      * @return string|array Unslashed value.
      */
-    function wp_unslash( $value ) {
+    function wp_unslash( $value ) { // NOSONAR
         if ( is_array( $value ) ) {
             return array_map( 'wp_unslash', $value );
         }
@@ -764,7 +764,7 @@ if ( ! function_exists( 'set_transient' ) ) {
      * @param int    $expiration Time until expiration in seconds (0 = no expiration).
      * @return bool True if the value was set.
      */
-    function set_transient( string $transient, $value, int $expiration = 0 ): bool {
+    function set_transient( string $transient, $value, int $expiration = 0 ): bool { // NOSONAR
         global $bpi_test_transients;
         $bpi_test_transients[ $transient ] = array(
             'value'      => $value,
@@ -781,7 +781,7 @@ if ( ! function_exists( 'get_transient' ) ) {
      * @param string $transient Transient name.
      * @return mixed Transient value or false if not set.
      */
-    function get_transient( string $transient ) {
+    function get_transient( string $transient ) { // NOSONAR
         global $bpi_test_transients;
         if ( array_key_exists( $transient, $bpi_test_transients ) ) {
             return $bpi_test_transients[ $transient ]['value'];
@@ -797,7 +797,7 @@ if ( ! function_exists( 'delete_transient' ) ) {
      * @param string $transient Transient name.
      * @return bool True if the transient was deleted.
      */
-    function delete_transient( string $transient ): bool {
+    function delete_transient( string $transient ): bool { // NOSONAR
         global $bpi_test_transients;
         if ( array_key_exists( $transient, $bpi_test_transients ) ) {
             unset( $bpi_test_transients[ $transient ] );
@@ -819,7 +819,7 @@ if ( ! function_exists( 'get_bloginfo' ) ) {
      * @param string $filter How to filter what is retrieved.
      * @return string Site info value.
      */
-    function get_bloginfo( string $show = '', string $filter = 'raw' ): string {
+    function get_bloginfo( string $show = '', string $filter = 'raw' ): string { // NOSONAR
         global $bpi_test_wp_version;
         if ( 'version' === $show ) {
             return $bpi_test_wp_version ?? '6.7.0';
@@ -836,7 +836,7 @@ if ( ! function_exists( 'size_format' ) ) {
      * @param int       $decimals Number of decimal places.
      * @return string Formatted size string.
      */
-    function size_format( $bytes, int $decimals = 0 ): string {
+    function size_format( $bytes, int $decimals = 0 ): string { // NOSONAR
         $units = array( 'B', 'KB', 'MB', 'GB', 'TB' );
         $bytes = max( $bytes, 0 );
         $pow   = floor( ( $bytes ? log( $bytes ) : 0 ) / log( 1024 ) );
@@ -856,7 +856,7 @@ if ( ! function_exists( 'wp_mkdir_p' ) ) {
      * @param string $target Directory path to create.
      * @return bool True on success.
      */
-    function wp_mkdir_p( string $target ): bool {
+    function wp_mkdir_p( string $target ): bool { // NOSONAR
         if ( is_dir( $target ) ) {
             return true;
         }
@@ -873,7 +873,7 @@ if ( ! function_exists( 'wp_generate_password' ) ) {
      * @param bool $extra_special_chars Whether to include extra special characters.
      * @return string Generated password.
      */
-    function wp_generate_password( int $length = 12, bool $special_chars = true, bool $extra_special_chars = false ): string {
+    function wp_generate_password( int $length = 12, bool $special_chars = true, bool $extra_special_chars = false ): string { // NOSONAR
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $password = '';
         for ( $i = 0; $i < $length; $i++ ) {
@@ -901,7 +901,7 @@ if ( ! function_exists( 'activate_plugin' ) ) {
      * @param bool   $silent       Whether to suppress activation hooks.
      * @return \WP_Error|null WP_Error on failure, null on success.
      */
-    function activate_plugin( string $plugin, string $redirect = '', bool $network_wide = false, bool $silent = false ): \WP_Error|null {
+    function activate_plugin( string $plugin, string $redirect = '', bool $network_wide = false, bool $silent = false ): \WP_Error|null { // NOSONAR
         global $bpi_test_active_plugins, $bpi_test_activate_plugin_result;
         if ( isset( $bpi_test_activate_plugin_result ) && is_wp_error( $bpi_test_activate_plugin_result ) ) {
             return $bpi_test_activate_plugin_result;
@@ -918,7 +918,7 @@ if ( ! function_exists( 'is_plugin_active' ) ) {
      * @param string $plugin Plugin path relative to plugins directory.
      * @return bool True if the plugin is active.
      */
-    function is_plugin_active( string $plugin ): bool {
+    function is_plugin_active( string $plugin ): bool { // NOSONAR
         global $bpi_test_active_plugins;
         return ! empty( $bpi_test_active_plugins[ $plugin ] );
     }
@@ -931,7 +931,7 @@ if ( ! function_exists( 'get_plugins' ) ) {
      * @param string $plugin_folder Optional plugin folder to search.
      * @return array Array of plugin data.
      */
-    function get_plugins( string $plugin_folder = '' ): array {
+    function get_plugins( string $plugin_folder = '' ): array { // NOSONAR
         global $bpi_test_installed_plugins;
         return $bpi_test_installed_plugins ?? array();
     }
@@ -942,7 +942,7 @@ if ( ! class_exists( 'Plugin_Upgrader' ) ) {
     /**
      * Minimal Plugin_Upgrader stub for unit testing.
      */
-    class Plugin_Upgrader {
+    class Plugin_Upgrader { // NOSONAR
         public $skin;
         public $result;
 
@@ -950,11 +950,11 @@ if ( ! class_exists( 'Plugin_Upgrader' ) ) {
             $this->skin = $skin;
         }
 
-        public function install( string $package, array $args = array() ) {
+        public function install( string $package, array $args = array() ) { // NOSONAR
             return $this->result ?? true;
         }
 
-        public function upgrade( string $plugin, array $args = array() ) {
+        public function upgrade( string $plugin, array $args = array() ) { // NOSONAR
             return $this->result ?? true;
         }
     }
@@ -962,9 +962,9 @@ if ( ! class_exists( 'Plugin_Upgrader' ) ) {
 
 // Minimal WP_Ajax_Upgrader_Skin stub.
 if ( ! class_exists( 'WP_Ajax_Upgrader_Skin' ) ) {
-    class WP_Ajax_Upgrader_Skin {
-        public function __construct( $args = array() ) {}
-        public function get_errors(): \WP_Error {
+    class WP_Ajax_Upgrader_Skin { // NOSONAR
+        public function __construct( $args = array() ) { /* WP API stub */ } // NOSONAR
+        public function get_errors(): \WP_Error { // NOSONAR
             return new \WP_Error();
         }
     }
@@ -990,7 +990,7 @@ if ( ! function_exists( 'wp_mail' ) ) {
      * @param string|array $attachments Optional attachments.
      * @return bool True (always succeeds in tests).
      */
-    function wp_mail( $to, string $subject, string $message, $headers = '', $attachments = array() ): bool {
+    function wp_mail( $to, string $subject, string $message, $headers = '', $attachments = array() ): bool { // NOSONAR
         global $bpi_test_emails;
         $bpi_test_emails[] = array(
             'to'          => is_array( $to ) ? $to : array( $to ),
@@ -1011,7 +1011,7 @@ if ( ! function_exists( 'wp_get_current_user' ) ) {
      *
      * @return object Minimal user object.
      */
-    function wp_get_current_user(): object {
+    function wp_get_current_user(): object { // NOSONAR
         global $bpi_test_current_user_login, $bpi_test_current_user_email;
         return (object) array(
             'ID'           => get_current_user_id(),
@@ -1042,7 +1042,7 @@ if ( ! function_exists( 'add_submenu_page' ) ) {
      * @param int|null $position    The position in the menu order.
      * @return string|false The resulting page's hook_suffix, or false if the user lacks capability.
      */
-    function add_submenu_page( string $parent_slug, string $page_title, string $menu_title, string $capability, string $menu_slug, $callback = '', $position = null ) {
+    function add_submenu_page( string $parent_slug, string $page_title, string $menu_title, string $capability, string $menu_slug, $callback = '', $position = null ) { // NOSONAR
         global $bpi_test_submenu_pages;
         $bpi_test_submenu_pages[ $menu_slug ] = array(
             'parent_slug' => $parent_slug,
@@ -1068,7 +1068,7 @@ if ( ! function_exists( 'add_filter' ) ) {
      * @param int      $accepted_args Number of arguments the callback accepts.
      * @return true Always returns true.
      */
-    function add_filter( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): bool {
+    function add_filter( string $hook_name, $callback, int $priority = 10, int $accepted_args = 1 ): bool { // NOSONAR
         global $bpi_test_hooks;
         $bpi_test_hooks[] = array(
             'type'          => 'filter',
@@ -1099,7 +1099,7 @@ if ( ! function_exists( 'wp_enqueue_style' ) ) {
      * @param string|bool|null $ver    Stylesheet version number.
      * @param string           $media  Media for which this stylesheet has been defined.
      */
-    function wp_enqueue_style( string $handle, string $src = '', array $deps = array(), $ver = false, string $media = 'all' ): void {
+    function wp_enqueue_style( string $handle, string $src = '', array $deps = array(), $ver = false, string $media = 'all' ): void { // NOSONAR
         global $bpi_test_enqueued_styles;
         $bpi_test_enqueued_styles[ $handle ] = array(
             'handle' => $handle,
@@ -1121,7 +1121,7 @@ if ( ! function_exists( 'wp_enqueue_script' ) ) {
      * @param string|bool|null $ver       Script version number.
      * @param bool|array       $in_footer Whether to enqueue in footer.
      */
-    function wp_enqueue_script( string $handle, string $src = '', array $deps = array(), $ver = false, $in_footer = false ): void {
+    function wp_enqueue_script( string $handle, string $src = '', array $deps = array(), $ver = false, $in_footer = false ): void { // NOSONAR
         global $bpi_test_enqueued_scripts;
         $bpi_test_enqueued_scripts[ $handle ] = array(
             'handle'    => $handle,
@@ -1142,7 +1142,7 @@ if ( ! function_exists( 'wp_localize_script' ) ) {
      * @param array  $l10n        The data itself.
      * @return bool True on success, false on failure.
      */
-    function wp_localize_script( string $handle, string $object_name, array $l10n ): bool {
+    function wp_localize_script( string $handle, string $object_name, array $l10n ): bool { // NOSONAR
         global $bpi_test_localized_scripts;
         $bpi_test_localized_scripts[ $handle ] = array(
             'handle'      => $handle,
@@ -1167,7 +1167,7 @@ if ( ! function_exists( 'is_multisite' ) ) {
      *
      * @return bool Whether WordPress is running in multisite mode.
      */
-    function is_multisite(): bool {
+    function is_multisite(): bool { // NOSONAR
         global $bpi_test_is_multisite;
         return (bool) $bpi_test_is_multisite;
     }
@@ -1179,7 +1179,7 @@ if ( ! function_exists( 'is_network_admin' ) ) {
      *
      * @return bool Whether the current screen is the Network Admin.
      */
-    function is_network_admin(): bool {
+    function is_network_admin(): bool { // NOSONAR
         global $bpi_test_is_network_admin;
         return (bool) $bpi_test_is_network_admin;
     }
@@ -1192,7 +1192,7 @@ if ( ! function_exists( 'network_admin_url' ) ) {
      * @param string $path Optional path relative to the network admin URL.
      * @return string Network admin URL.
      */
-    function network_admin_url( string $path = '' ): string {
+    function network_admin_url( string $path = '' ): string { // NOSONAR
         return 'https://example.com/wp-admin/network/' . ltrim( $path, '/' );
     }
 }
@@ -1211,7 +1211,7 @@ if ( ! class_exists( 'WP_CLI' ) ) {
     /**
      * Minimal WP_CLI stub for unit testing.
      */
-    class WP_CLI {
+    class WP_CLI { // NOSONAR
 
         /**
          * Register a WP-CLI command.
@@ -1220,7 +1220,7 @@ if ( ! class_exists( 'WP_CLI' ) ) {
          * @param callable|string $callable Command handler.
          * @param array           $args     Command arguments.
          */
-        public static function add_command( string $name, $callable, array $args = array() ): void {
+        public static function add_command( string $name, $callable, array $args = array() ): void { // NOSONAR
             global $bpi_test_cli_commands;
             $bpi_test_cli_commands[] = array(
                 'name'     => $name,
@@ -1265,7 +1265,7 @@ if ( ! class_exists( 'WP_CLI' ) ) {
          * @param string $message Message to log.
          * @param bool   $exit    Whether to exit (ignored in tests).
          */
-        public static function error( string $message, bool $exit = true ): void {
+        public static function error( string $message, bool $exit = true ): void { // NOSONAR
             global $bpi_test_cli_log;
             $bpi_test_cli_log[] = array( 'type' => 'error', 'message' => $message );
         }
@@ -1293,4 +1293,4 @@ if ( ! class_exists( 'WP_CLI' ) ) {
 }
 
 // Load WP_CLI\Utils namespace stubs from a separate file.
-require_once __DIR__ . '/wp-cli-utils-stubs.php';
+require_once __DIR__ . '/wp-cli-utils-stubs.php'; // NOSONAR

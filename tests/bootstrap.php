@@ -21,7 +21,7 @@ if ( ! defined( 'WP_CONTENT_DIR' ) ) {
 }
 
 // Load WordPress function stubs.
-require_once __DIR__ . '/wp-stubs.php';
+require_once __DIR__ . '/wp-stubs.php'; // NOSONAR
 
 // Load the plugin file.
-require_once dirname( __DIR__ ) . '/bulk-plugin-installer.php';
+require_once dirname( __DIR__ ) . '/bulk-plugin-installer.php'; // NOSONAR

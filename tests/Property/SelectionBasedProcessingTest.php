@@ -208,7 +208,7 @@ class SelectionBasedProcessingTest extends TestCase {
             ->forAll(
                 Generator\choose( 1, 15 ) // queue size (irrelevant since nothing is selected)
             )
-            ->then( function ( int $_queueSize ): void {
+            ->then( function ( int $queueSize ): void { // NOSONAR — $queueSize intentionally unused; generator drives iteration count
                 $this->processor->processedSlugs = array();
 
                 // Simulate: user unchecks everything, so nothing is passed.

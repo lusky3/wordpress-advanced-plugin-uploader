@@ -18,7 +18,7 @@ if ( ! function_exists( 'WP_CLI\\Utils\\format_items' ) ) {
      * @param array  $items   Items to display.
      * @param array  $fields  Fields to display.
      */
-    function format_items( string $format, array $items, array $fields ): void {
+    function format_items( string $format, array $items, array $fields ): void { // NOSONAR
         global $bpi_test_cli_format_items_calls;
         $bpi_test_cli_format_items_calls[] = array(
             'format' => $format,
@@ -36,7 +36,7 @@ if ( ! function_exists( 'WP_CLI\\Utils\\make_progress_bar' ) ) {
      * @param int    $count   Total number of items.
      * @return object Object with tick() and finish() methods.
      */
-    function make_progress_bar( string $message, int $count ): object {
+    function make_progress_bar( string $message, int $count ): object { // NOSONAR
         return new class( $message, $count ) {
             /** @var string */
             public string $message;

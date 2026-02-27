@@ -19,6 +19,9 @@ use PHPUnit\Framework\TestCase;
  */
 class MultisiteTest extends TestCase {
 
+    private const PLUGIN_NAME = 'Test Plugin';
+    private const VERSION_100 = '1.0.0';
+
     /**
      * Set up test fixtures.
      */
@@ -281,8 +284,8 @@ class MultisiteTest extends TestCase {
             'value' => array(
                 array(
                     'slug'           => 'test-plugin',
-                    'plugin_name'    => 'Test Plugin',
-                    'plugin_version' => '1.0.0',
+                    'plugin_name'    => self::PLUGIN_NAME,
+                    'plugin_version' => self::VERSION_100,
                     'plugin_author'  => 'Test Author',
                     'plugin_description' => 'A test plugin.',
                     'file_path'      => '',
@@ -325,8 +328,8 @@ class MultisiteTest extends TestCase {
             'value' => array(
                 array(
                     'slug'           => 'test-plugin',
-                    'plugin_name'    => 'Test Plugin',
-                    'plugin_version' => '1.0.0',
+                    'plugin_name'    => self::PLUGIN_NAME,
+                    'plugin_version' => self::VERSION_100,
                     'plugin_author'  => 'Test Author',
                     'plugin_description' => 'A test plugin.',
                     'file_path'      => '',
@@ -440,7 +443,7 @@ class MultisiteTest extends TestCase {
 
         // Create a testable subclass that tracks network_wide calls.
         $processor = new class( $rollback, $logger, $settings ) extends BPIPluginProcessor {
-            public bool $last_network_wide = false;
+            public bool $lastNetworkWide = false;
 
             protected function runUpgrader( string $action, string $file_path, string $plugin_file ): true|\WP_Error {
                 return true;
@@ -451,7 +454,7 @@ class MultisiteTest extends TestCase {
             }
 
             protected function wpActivatePlugin( string $plugin_file, bool $network_wide = false ): \WP_Error|null {
-                $this->last_network_wide = $network_wide;
+                $this->lastNetworkWide = $network_wide;
                 return null;
             }
         };
@@ -459,17 +462,17 @@ class MultisiteTest extends TestCase {
         $result = $processor->processPlugin( array(
             'slug'             => 'test-plugin',
             'action'           => 'install',
-            'plugin_name'      => 'Test Plugin',
+            'plugin_name'      => self::PLUGIN_NAME,
             'file_path'        => '/tmp/test.zip',
             'plugin_file'      => 'test-plugin/test-plugin.php',
-            'plugin_version'   => '1.0.0',
+            'plugin_version'   => self::VERSION_100,
             'installed_version' => '',
             'activate'         => true,
             'network_activate' => true,
         ) );
 
         $this->assertSame( 'success', $result['status'] );
-        $this->assertTrue( $processor->last_network_wide );
+        $this->assertTrue( $processor->lastNetworkWide );
     }
 
     /**
@@ -484,7 +487,7 @@ class MultisiteTest extends TestCase {
         $settings = new BPISettingsManager();
 
         $processor = new class( $rollback, $logger, $settings ) extends BPIPluginProcessor {
-            public bool $last_network_wide = true; // Start true to verify it gets set to false.
+            public bool $lastNetworkWide = true; // Start true to verify it gets set to false.
 
             protected function runUpgrader( string $action, string $file_path, string $plugin_file ): true|\WP_Error {
                 return true;
@@ -495,7 +498,7 @@ class MultisiteTest extends TestCase {
             }
 
             protected function wpActivatePlugin( string $plugin_file, bool $network_wide = false ): \WP_Error|null {
-                $this->last_network_wide = $network_wide;
+                $this->lastNetworkWide = $network_wide;
                 return null;
             }
         };
@@ -503,16 +506,16 @@ class MultisiteTest extends TestCase {
         $result = $processor->processPlugin( array(
             'slug'             => 'test-plugin',
             'action'           => 'install',
-            'plugin_name'      => 'Test Plugin',
+            'plugin_name'      => self::PLUGIN_NAME,
             'file_path'        => '/tmp/test.zip',
             'plugin_file'      => 'test-plugin/test-plugin.php',
-            'plugin_version'   => '1.0.0',
+            'plugin_version'   => self::VERSION_100,
             'installed_version' => '',
             'activate'         => true,
         ) );
 
         $this->assertSame( 'success', $result['status'] );
-        $this->assertFalse( $processor->last_network_wide );
+        $this->assertFalse( $processor->lastNetworkWide );
     }
 
     // ── Single Site Within Multisite ─────────────────────────

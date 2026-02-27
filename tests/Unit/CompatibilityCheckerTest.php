@@ -16,6 +16,9 @@ use PHPUnit\Framework\TestCase;
  */
 class CompatibilityCheckerTest extends TestCase {
 
+    private const WP_VERSION = '6.7.0';
+    private const IMPOSSIBLE_VERSION = '99.0.0';
+
     /**
      * The checker instance under test.
      *
@@ -28,7 +31,7 @@ class CompatibilityCheckerTest extends TestCase {
      */
     protected function setUp(): void {
         global $bpi_test_wp_version;
-        $bpi_test_wp_version = '6.7.0';
+        $bpi_test_wp_version = self::WP_VERSION;
 
         $this->checker = new BPICompatibilityChecker();
     }
@@ -38,7 +41,7 @@ class CompatibilityCheckerTest extends TestCase {
      */
     protected function tearDown(): void {
         global $bpi_test_wp_version;
-        $bpi_test_wp_version = '6.7.0';
+        $bpi_test_wp_version = self::WP_VERSION;
     }
 
     // ---------------------------------------------------------------
@@ -79,7 +82,7 @@ class CompatibilityCheckerTest extends TestCase {
 
     public function test_check_php_version_fails_when_requirement_exceeds_current(): void {
         // Require a version far in the future.
-        $this->assertFalse( $this->checker->checkPhpVersion( '99.0.0' ) );
+        $this->assertFalse( $this->checker->checkPhpVersion( self::IMPOSSIBLE_VERSION ) );
     }
 
     // ---------------------------------------------------------------
@@ -91,11 +94,11 @@ class CompatibilityCheckerTest extends TestCase {
     }
 
     public function test_check_wp_version_passes_for_exact_match(): void {
-        $this->assertTrue( $this->checker->checkWpVersion( '6.7.0' ) );
+        $this->assertTrue( $this->checker->checkWpVersion( self::WP_VERSION ) );
     }
 
     public function test_check_wp_version_fails_when_requirement_exceeds_current(): void {
-        $this->assertFalse( $this->checker->checkWpVersion( '99.0.0' ) );
+        $this->assertFalse( $this->checker->checkWpVersion( self::IMPOSSIBLE_VERSION ) );
     }
 
     public function test_check_wp_version_respects_global_override(): void {
@@ -128,31 +131,31 @@ class CompatibilityCheckerTest extends TestCase {
     }
 
     public function test_check_plugin_returns_php_issue_for_incompatible_php(): void {
-        $data   = $this->makePluginData( array( 'requires_php' => '99.0.0' ) );
+        $data   = $this->makePluginData( array( 'requires_php' => self::IMPOSSIBLE_VERSION ) );
         $issues = $this->checker->checkPlugin( $data );
 
         $this->assertCount( 1, $issues );
         $this->assertSame( 'php_version', $issues[0]['type'] );
-        $this->assertSame( '99.0.0', $issues[0]['required'] );
+        $this->assertSame( self::IMPOSSIBLE_VERSION, $issues[0]['required'] );
         $this->assertSame( PHP_VERSION, $issues[0]['current'] );
         $this->assertNotEmpty( $issues[0]['message'] );
     }
 
     public function test_check_plugin_returns_wp_issue_for_incompatible_wp(): void {
-        $data   = $this->makePluginData( array( 'requires_wp' => '99.0.0' ) );
+        $data   = $this->makePluginData( array( 'requires_wp' => self::IMPOSSIBLE_VERSION ) );
         $issues = $this->checker->checkPlugin( $data );
 
         $this->assertCount( 1, $issues );
         $this->assertSame( 'wp_version', $issues[0]['type'] );
-        $this->assertSame( '99.0.0', $issues[0]['required'] );
-        $this->assertSame( '6.7.0', $issues[0]['current'] );
+        $this->assertSame( self::IMPOSSIBLE_VERSION, $issues[0]['required'] );
+        $this->assertSame( self::WP_VERSION, $issues[0]['current'] );
         $this->assertNotEmpty( $issues[0]['message'] );
     }
 
     public function test_check_plugin_returns_both_issues_when_both_incompatible(): void {
         $data   = $this->makePluginData( array(
-            'requires_php' => '99.0.0',
-            'requires_wp'  => '99.0.0',
+            'requires_php' => self::IMPOSSIBLE_VERSION,
+            'requires_wp'  => self::IMPOSSIBLE_VERSION,
         ) );
         $issues = $this->checker->checkPlugin( $data );
 
@@ -210,8 +213,8 @@ class CompatibilityCheckerTest extends TestCase {
             ) ),
             $this->makePluginData( array(
                 'slug'         => 'incompatible-plugin',
-                'requires_php' => '99.0.0',
-                'requires_wp'  => '99.0.0',
+                'requires_php' => self::IMPOSSIBLE_VERSION,
+                'requires_wp'  => self::IMPOSSIBLE_VERSION,
             ) ),
         );
 

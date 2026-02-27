@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
  * Testable subclass that overrides protected WordPress API methods
  * to simulate install/update/activate behavior without real WordPress.
  */
-class Testable_Plugin_Processor extends BPIPluginProcessor {
+class TestablePluginProcessor extends BPIPluginProcessor {
 
     /**
      * Simulated upgrader results keyed by slug.
@@ -25,59 +25,59 @@ class Testable_Plugin_Processor extends BPIPluginProcessor {
      *
      * @var array<string, true|\WP_Error>
      */
-    public array $upgrader_results = array();
+    public array $upgraderResults = array();
 
     /**
      * Default upgrader result when no per-slug result is set.
      *
      * @var true|\WP_Error
      */
-    public $default_upgrader_result = true;
+    public $defaultUpgraderResult = true;
 
     /**
      * Simulated active plugins (plugin_file => bool).
      *
      * @var array<string, bool>
      */
-    public array $active_plugins = array();
+    public array $activePlugins = array();
 
     /**
      * Simulated activation results (plugin_file => null|\WP_Error).
      *
      * @var array<string, null|\WP_Error>
      */
-    public array $activation_results = array();
+    public array $activationResults = array();
 
     /**
      * Track which plugins were activated.
      *
      * @var array
      */
-    public array $activated_plugins = array();
+    public array $activatedPlugins = array();
 
     /**
      * Track which plugins the upgrader was called for.
      *
      * @var array
      */
-    public array $upgrader_calls = array();
+    public array $upgraderCalls = array();
 
     /** @inheritDoc */
     protected function runUpgrader( string $action, string $file_path, string $plugin_file ): true|\WP_Error {
         // Extract slug from plugin_file for lookup.
         $slug = explode( '/', $plugin_file )[0] ?? '';
-        $this->upgrader_calls[] = array(
+        $this->upgraderCalls[] = array(
             'action'      => $action,
             'file_path'   => $file_path,
             'plugin_file' => $plugin_file,
             'slug'        => $slug,
         );
 
-        if ( isset( $this->upgrader_results[ $slug ] ) ) {
-            return $this->upgrader_results[ $slug ];
+        if ( isset( $this->upgraderResults[ $slug ] ) ) {
+            return $this->upgraderResults[ $slug ];
         }
 
-        return $this->default_upgrader_result;
+        return $this->defaultUpgraderResult;
     }
 
     /** @inheritDoc */
@@ -87,15 +87,15 @@ class Testable_Plugin_Processor extends BPIPluginProcessor {
 
     /** @inheritDoc */
     protected function isPluginActive( string $plugin_file ): bool {
-        return $this->active_plugins[ $plugin_file ] ?? false;
+        return $this->activePlugins[ $plugin_file ] ?? false;
     }
 
     /** @inheritDoc */
     protected function wpActivatePlugin( string $plugin_file, bool $network_wide = false ): \WP_Error|null {
-        $this->activated_plugins[] = $plugin_file;
+        $this->activatedPlugins[] = $plugin_file;
 
-        if ( isset( $this->activation_results[ $plugin_file ] ) ) {
-            return $this->activation_results[ $plugin_file ];
+        if ( isset( $this->activationResults[ $plugin_file ] ) ) {
+            return $this->activationResults[ $plugin_file ];
         }
 
         return null; // Success.
@@ -108,7 +108,12 @@ class Testable_Plugin_Processor extends BPIPluginProcessor {
  */
 class PluginProcessorTest extends TestCase {
 
-    private Testable_Plugin_Processor $processor;
+    private const VERSION_1 = '1.0.0';
+    private const VERSION_2 = '2.0.0';
+    private const TEST_PLUGINS_DIR = '/bpi_test_plugins';
+    private const FS_CHECK_FILE = '/fs-check.php';
+
+    private TestablePluginProcessor $processor;
     private BPIRollbackManager $rollback;
     private BPILogManager $logger;
     private BPISettingsManager $settings;
@@ -128,7 +133,7 @@ class PluginProcessorTest extends TestCase {
         $this->rollback  = new BPIRollbackManager();
         $this->logger    = new BPILogManager();
         $this->settings  = new BPISettingsManager();
-        $this->processor = new Testable_Plugin_Processor(
+        $this->processor = new TestablePluginProcessor(
             $this->rollback,
             $this->logger,
             $this->settings
@@ -142,7 +147,7 @@ class PluginProcessorTest extends TestCase {
         string $slug,
         string $action = 'install',
         ?bool $activate = null,
-        string $version = '1.0.0',
+        string $version = self::VERSION_1,
         string $installed_version = ''
     ): array {
         $data = array(
@@ -181,10 +186,10 @@ class PluginProcessorTest extends TestCase {
         $this->assertSame( 'gamma', $results[2]['slug'] );
 
         // Verify upgrader was called in order.
-        $this->assertCount( 3, $this->processor->upgrader_calls );
-        $this->assertSame( 'alpha', $this->processor->upgrader_calls[0]['slug'] );
-        $this->assertSame( 'beta', $this->processor->upgrader_calls[1]['slug'] );
-        $this->assertSame( 'gamma', $this->processor->upgrader_calls[2]['slug'] );
+        $this->assertCount( 3, $this->processor->upgraderCalls );
+        $this->assertSame( 'alpha', $this->processor->upgraderCalls[0]['slug'] );
+        $this->assertSame( 'beta', $this->processor->upgraderCalls[1]['slug'] );
+        $this->assertSame( 'gamma', $this->processor->upgraderCalls[2]['slug'] );
     }
 
     // ------------------------------------------------------------------
@@ -202,15 +207,15 @@ class PluginProcessorTest extends TestCase {
 
     public function test_process_plugin_returns_failure_and_triggers_rollback_for_failed_update(): void {
         // Create a real temp directory so rollback manager can create a backup.
-        $plugin_dir = sys_get_temp_dir() . '/bpi_test_plugins/updatable';
+        $plugin_dir = sys_get_temp_dir() . self::TEST_PLUGINS_DIR . '/updatable';
         if ( ! is_dir( $plugin_dir ) ) {
             mkdir( $plugin_dir, 0755, true );
         }
         file_put_contents( $plugin_dir . '/updatable.php', '<?php // v1' );
 
-        $this->processor->upgrader_results['updatable'] = new \WP_Error( 'update_failed', 'Update error' );
+        $this->processor->upgraderResults['updatable'] = new \WP_Error( 'update_failed', 'Update error' );
 
-        $plugin = $this->makePlugin( 'updatable', 'update', null, '2.0.0', '1.0.0' );
+        $plugin = $this->makePlugin( 'updatable', 'update', null, self::VERSION_2, self::VERSION_1 );
 
         $results = $this->processor->processBatch( array( $plugin ) );
 
@@ -218,18 +223,18 @@ class PluginProcessorTest extends TestCase {
         $this->assertTrue( $results[0]['rolled_back'] );
 
         // Cleanup.
-        $this->recursiveDelete( sys_get_temp_dir() . '/bpi_test_plugins' );
+        $this->recursiveDelete( sys_get_temp_dir() . self::TEST_PLUGINS_DIR );
     }
 
     public function test_process_plugin_removes_partial_install_on_failed_new_install(): void {
         // Create a partial install directory.
-        $plugin_dir = sys_get_temp_dir() . '/bpi_test_plugins/partial';
+        $plugin_dir = sys_get_temp_dir() . self::TEST_PLUGINS_DIR . '/partial';
         if ( ! is_dir( $plugin_dir ) ) {
             mkdir( $plugin_dir, 0755, true );
         }
         file_put_contents( $plugin_dir . '/partial.php', '<?php // partial' );
 
-        $this->processor->upgrader_results['partial'] = new \WP_Error( 'install_failed', 'Install error' );
+        $this->processor->upgraderResults['partial'] = new \WP_Error( 'install_failed', 'Install error' );
 
         $plugin = $this->makePlugin( 'partial', 'install' );
 
@@ -240,7 +245,7 @@ class PluginProcessorTest extends TestCase {
         $this->assertDirectoryDoesNotExist( $plugin_dir );
 
         // Cleanup parent.
-        $parent = sys_get_temp_dir() . '/bpi_test_plugins';
+        $parent = sys_get_temp_dir() . self::TEST_PLUGINS_DIR;
         if ( is_dir( $parent ) ) {
             $this->recursiveDelete( $parent );
         }
@@ -260,17 +265,17 @@ class PluginProcessorTest extends TestCase {
         $results = $this->processor->processBatch( array( $plugin ) );
 
         $this->assertTrue( $results[0]['activated'] );
-        $this->assertContains( 'toggled/toggled.php', $this->processor->activated_plugins );
+        $this->assertContains( 'toggled/toggled.php', $this->processor->activatedPlugins );
     }
 
     public function test_activate_plugin_skips_activation_for_already_active_on_update(): void {
         $plugin_file = 'active-plugin/active-plugin.php';
-        $this->processor->active_plugins[ $plugin_file ] = true;
+        $this->processor->activePlugins[ $plugin_file ] = true;
 
-        $plugin = $this->makePlugin( 'active-plugin', 'update', true, '2.0.0', '1.0.0' );
+        $plugin = $this->makePlugin( 'active-plugin', 'update', true, self::VERSION_2, self::VERSION_1 );
 
         // Need a temp dir for backup.
-        $plugin_dir = sys_get_temp_dir() . '/bpi_test_plugins/active-plugin';
+        $plugin_dir = sys_get_temp_dir() . self::TEST_PLUGINS_DIR . '/active-plugin';
         if ( ! is_dir( $plugin_dir ) ) {
             mkdir( $plugin_dir, 0755, true );
         }
@@ -281,9 +286,9 @@ class PluginProcessorTest extends TestCase {
         $this->assertSame( 'success', $results[0]['status'] );
         $this->assertTrue( $results[0]['activated'] );
         // activatePlugin should NOT have been called.
-        $this->assertNotContains( $plugin_file, $this->processor->activated_plugins );
+        $this->assertNotContains( $plugin_file, $this->processor->activatedPlugins );
 
-        $this->recursiveDelete( sys_get_temp_dir() . '/bpi_test_plugins' );
+        $this->recursiveDelete( sys_get_temp_dir() . self::TEST_PLUGINS_DIR );
     }
 
     public function test_activate_plugin_failure_leaves_plugin_installed_but_deactivated(): void {
@@ -291,7 +296,7 @@ class PluginProcessorTest extends TestCase {
         $bpi_test_options['bpi_auto_activate'] = true;
 
         $plugin_file = 'fail-activate/fail-activate.php';
-        $this->processor->activation_results[ $plugin_file ] = new \WP_Error(
+        $this->processor->activationResults[ $plugin_file ] = new \WP_Error(
             'activation_error',
             'Fatal error during activation'
         );
@@ -320,7 +325,7 @@ class PluginProcessorTest extends TestCase {
     // ------------------------------------------------------------------
 
     public function test_get_batch_summary_returns_correct_counts(): void {
-        $this->processor->upgrader_results['fail1'] = new \WP_Error( 'err', 'fail' );
+        $this->processor->upgraderResults['fail1'] = new \WP_Error( 'err', 'fail' );
 
         $plugins = array(
             $this->makePlugin( 'install1' ),
@@ -342,7 +347,7 @@ class PluginProcessorTest extends TestCase {
     // ------------------------------------------------------------------
 
     public function test_process_batch_continues_after_individual_plugin_failure(): void {
-        $this->processor->upgrader_results['middle'] = new \WP_Error( 'err', 'fail' );
+        $this->processor->upgraderResults['middle'] = new \WP_Error( 'err', 'fail' );
 
         $plugins = array(
             $this->makePlugin( 'first' ),
@@ -365,7 +370,7 @@ class PluginProcessorTest extends TestCase {
     public function test_dry_run_returns_simulated_results_without_calling_upgrader(): void {
         $plugins = array(
             $this->makePlugin( 'dry1' ),
-            $this->makePlugin( 'dry2', 'update', null, '2.0.0', '1.0.0' ),
+            $this->makePlugin( 'dry2', 'update', null, self::VERSION_2, self::VERSION_1 ),
         );
 
         $results = $this->processor->processBatch( $plugins, true );
@@ -377,40 +382,40 @@ class PluginProcessorTest extends TestCase {
         $this->assertTrue( $results[1]['is_dry_run'] ?? false );
 
         // Upgrader should NOT have been called.
-        $this->assertEmpty( $this->processor->upgrader_calls );
+        $this->assertEmpty( $this->processor->upgraderCalls );
     }
 
     public function test_dry_run_does_not_modify_filesystem(): void {
         // Create a temp plugin directory to verify it's untouched.
-        $plugin_dir = sys_get_temp_dir() . '/bpi_test_plugins/fs-check';
+        $plugin_dir = sys_get_temp_dir() . self::TEST_PLUGINS_DIR . '/fs-check';
         if ( ! is_dir( $plugin_dir ) ) {
             mkdir( $plugin_dir, 0755, true );
         }
-        file_put_contents( $plugin_dir . '/fs-check.php', '<?php // v1.0' );
-        $before_content = file_get_contents( $plugin_dir . '/fs-check.php' );
+        file_put_contents( $plugin_dir . self::FS_CHECK_FILE, '<?php // v1.0' );
+        $before_content = file_get_contents( $plugin_dir . self::FS_CHECK_FILE );
 
         $plugins = array(
-            $this->makePlugin( 'fs-check', 'update', null, '2.0.0', '1.0.0' ),
+            $this->makePlugin( 'fs-check', 'update', null, self::VERSION_2, self::VERSION_1 ),
         );
 
         $this->processor->processBatch( $plugins, true );
 
         // File should be unchanged.
-        $this->assertFileExists( $plugin_dir . '/fs-check.php' );
-        $this->assertSame( $before_content, file_get_contents( $plugin_dir . '/fs-check.php' ) );
+        $this->assertFileExists( $plugin_dir . self::FS_CHECK_FILE );
+        $this->assertSame( $before_content, file_get_contents( $plugin_dir . self::FS_CHECK_FILE ) );
 
         // No backup should have been created.
         $backup_dir = sys_get_temp_dir() . '/bpi-backups';
         $this->assertDirectoryDoesNotExist( $backup_dir );
 
-        $this->recursiveDelete( sys_get_temp_dir() . '/bpi_test_plugins' );
+        $this->recursiveDelete( sys_get_temp_dir() . self::TEST_PLUGINS_DIR );
     }
 
     public function test_dry_run_logs_with_is_dry_run_flag(): void {
         global $wpdb;
 
         $plugins = array(
-            $this->makePlugin( 'log-dry', 'install', null, '1.0.0' ),
+            $this->makePlugin( 'log-dry', 'install', null, self::VERSION_1 ),
         );
 
         $this->processor->processBatch( $plugins, true );
@@ -509,7 +514,7 @@ class PluginProcessorTest extends TestCase {
                 'plugin_name' => 'Ajax Dry',
                 'file_path'   => '/tmp/ajax-dry.zip',
                 'plugin_file' => 'ajax-dry/ajax-dry.php',
-                'plugin_version' => '1.0.0',
+                'plugin_version' => self::VERSION_1,
                 'installed_version' => '',
             ),
         );

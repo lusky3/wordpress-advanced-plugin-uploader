@@ -15,6 +15,9 @@ use PHPUnit\Framework\TestCase;
  */
 class LogManagerTest extends TestCase {
 
+    private const PLUGIN_NAME = 'My Plugin';
+    private const VERSION_100 = '1.0.0';
+
     /**
      * The Log Manager instance under test.
      *
@@ -68,9 +71,9 @@ class LogManagerTest extends TestCase {
         $this->logManager->log( 'install', array(
             'batch_id'     => 'batch_001',
             'plugin_slug'  => 'my-plugin',
-            'plugin_name'  => 'My Plugin',
+            'plugin_name'  => self::PLUGIN_NAME,
             'from_version' => '',
-            'to_version'   => '1.0.0',
+            'to_version'   => self::VERSION_100,
             'status'       => 'success',
             'message'      => 'Installed successfully.',
             'is_dry_run'   => false,
@@ -82,9 +85,9 @@ class LogManagerTest extends TestCase {
         $this->assertSame( 'install', $row['action'] );
         $this->assertSame( 'batch_001', $row['batch_id'] );
         $this->assertSame( 'my-plugin', $row['plugin_slug'] );
-        $this->assertSame( 'My Plugin', $row['plugin_name'] );
+        $this->assertSame( self::PLUGIN_NAME, $row['plugin_name'] );
         $this->assertSame( '', $row['from_version'] );
-        $this->assertSame( '1.0.0', $row['to_version'] );
+        $this->assertSame( self::VERSION_100, $row['to_version'] );
         $this->assertSame( 'success', $row['status'] );
         $this->assertSame( 'Installed successfully.', $row['message'] );
         $this->assertSame( 0, $row['is_dry_run'] );
@@ -307,14 +310,14 @@ class LogManagerTest extends TestCase {
 
         $this->logManager->log( 'update', array(
             'plugin_slug'  => 'my-plugin',
-            'plugin_name'  => 'My Plugin',
-            'from_version' => '1.0.0',
+            'plugin_name'  => self::PLUGIN_NAME,
+            'from_version' => self::VERSION_100,
             'to_version'   => '2.0.0',
             'status'       => 'success',
         ) );
 
         $row = $wpdb->bpi_log_rows[0];
-        $this->assertSame( '1.0.0', $row['from_version'] );
+        $this->assertSame( self::VERSION_100, $row['from_version'] );
         $this->assertSame( '2.0.0', $row['to_version'] );
     }
 }

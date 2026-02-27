@@ -106,9 +106,9 @@ class ProfileManagerTest extends TestCase {
     }
 
     public function test_save_profile_id_increments_after_deletion(): void {
-        $id1 = $this->manager->saveProfile( 'First', $this->samplePlugins() );
+        $this->manager->saveProfile( 'First', $this->samplePlugins() );
         $id2 = $this->manager->saveProfile( 'Second', $this->samplePlugins() );
-        $id3 = $this->manager->saveProfile( 'Third', $this->samplePlugins() );
+        $this->manager->saveProfile( 'Third', $this->samplePlugins() );
         $this->manager->deleteProfile( $id2 );
         $id4 = $this->manager->saveProfile( 'Fourth', $this->samplePlugins() );
 
