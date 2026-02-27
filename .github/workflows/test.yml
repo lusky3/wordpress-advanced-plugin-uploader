@@ -3,8 +3,20 @@ name: Tests
 on:
   push:
     branches: [main]
+    paths:
+      - '**.php'
+      - 'composer.*'
+      - 'phpunit.xml.dist'
+      - 'tests/**'
+      - '.github/workflows/test.yml'
   pull_request:
     branches: [main]
+    paths:
+      - '**.php'
+      - 'composer.*'
+      - 'phpunit.xml.dist'
+      - 'tests/**'
+      - '.github/workflows/test.yml'
 
 jobs:
   test:
@@ -13,10 +25,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['8.2', '8.3', '8.4']
-        wp-version: ['latest', '6.7']
-        exclude:
-          # No exclusions needed — all PHP versions support all WP versions
+        php-version: ['8.2', '8.3', '8.4', '8.5']
+        wp-version: ['latest', '6.7', '6.8', '6.9']
 
     env:
       WP_VERSION: ${{ matrix.wp-version }}
@@ -64,3 +74,23 @@ jobs:
             coverage-unit.xml
             coverage-property.xml
           retention-days: 7
+
+      - name: Upload coverage to Codecov
+        if: matrix.php-version == '8.4' && matrix.wp-version == 'latest' && env.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage-unit.xml,coverage-property.xml
+          flags: unittests,propertytests
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload coverage to qlty.sh
+        if: matrix.php-version == '8.4' && matrix.wp-version == 'latest' && env.QLTY_COVERAGE_TOKEN != ''
+        uses: qltysh/qlty-action/coverage@v2
+        with:
+          token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: coverage-unit.xml,coverage-property.xml
+        env:
+          QLTY_COVERAGE_TOKEN: ${{ secrets.QLTY_COVERAGE_TOKEN }}

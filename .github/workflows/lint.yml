@@ -3,8 +3,16 @@ name: Lint & Coding Standards
 on:
   push:
     branches: [main]
+    paths:
+      - '**.php'
+      - 'composer.*'
+      - '.github/workflows/lint.yml'
   pull_request:
     branches: [main]
+    paths:
+      - '**.php'
+      - 'composer.*'
+      - '.github/workflows/lint.yml'
 
 jobs:
   phpcs:
