@@ -1,0 +1,1026 @@
+/**
+ * Bulk Plugin Installer - Admin Styles
+ *
+ * Styles for the upload zone, queue list, progress indicators,
+ * and responsive layout following WordPress admin conventions.
+ *
+ * @package Bulk_Plugin_Installer
+ */
+
+/* ── Upload Zone ─────────────────────────────────────────── */
+
+.bpi-upload-zone {
+	border: 2px dashed #c3c4c7;
+	border-radius: 4px;
+	padding: 40px 20px;
+	text-align: center;
+	background: #f6f7f7;
+	transition: border-color 0.2s, background-color 0.2s;
+	cursor: pointer;
+	margin: 20px 0;
+	position: relative;
+}
+
+.bpi-upload-zone:hover,
+.bpi-upload-zone:focus-within {
+	border-color: #2271b1;
+	background: #f0f6fc;
+}
+
+.bpi-upload-zone.bpi-dragover {
+	border-color: #2271b1;
+	background: #e7f1fb;
+	border-style: solid;
+}
+
+.bpi-upload-zone__icon {
+	font-size: 48px;
+	color: #c3c4c7;
+	margin-bottom: 12px;
+	display: block;
+}
+
+.bpi-upload-zone.bpi-dragover .bpi-upload-zone__icon {
+	color: #2271b1;
+}
+
+.bpi-upload-zone__text {
+	font-size: 14px;
+	color: #50575e;
+	margin: 0 0 8px;
+}
+
+.bpi-upload-zone__subtext {
+	font-size: 13px;
+	color: #787c82;
+	margin: 0 0 16px;
+}
+
+.bpi-upload-zone__input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+/* ── Queue Section ───────────────────────────────────────── */
+
+.bpi-queue-section {
+	margin: 20px 0;
+}
+
+.bpi-queue-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.bpi-queue-header h2 {
+	margin: 0;
+	font-size: 1.1em;
+}
+
+.bpi-queue-summary {
+	font-size: 13px;
+	color: #50575e;
+}
+
+/* ── Queue List ──────────────────────────────────────────── */
+
+.bpi-queue-list {
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	margin: 0 0 16px;
+	padding: 0;
+	list-style: none;
+}
+
+.bpi-queue-item {
+	display: flex;
+	align-items: center;
+	padding: 10px 12px;
+	border-bottom: 1px solid #f0f0f1;
+	gap: 12px;
+}
+
+.bpi-queue-item:last-child {
+	border-bottom: none;
+}
+
+.bpi-queue-item__info {
+	flex: 1;
+	min-width: 0;
+}
+
+.bpi-queue-item__name {
+	font-weight: 600;
+	font-size: 13px;
+	color: #1d2327;
+	word-break: break-all;
+}
+
+.bpi-queue-item__size {
+	font-size: 12px;
+	color: #787c82;
+	margin-top: 2px;
+}
+
+.bpi-queue-item__status {
+	font-size: 12px;
+	color: #787c82;
+	white-space: nowrap;
+}
+
+.bpi-queue-item__status.bpi-status--uploading {
+	color: #2271b1;
+}
+
+.bpi-queue-item__status.bpi-status--success {
+	color: #00a32a;
+}
+
+.bpi-queue-item__status.bpi-status--error {
+	color: #d63638;
+}
+
+.bpi-queue-item__remove {
+	background: none;
+	border: none;
+	color: #d63638;
+	cursor: pointer;
+	padding: 4px 8px;
+	font-size: 13px;
+	border-radius: 3px;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.bpi-queue-item__remove:hover,
+.bpi-queue-item__remove:focus {
+	background: #fcf0f1;
+	color: #a00;
+	outline: 1px solid #d63638;
+}
+
+/* ── Progress Bar ────────────────────────────────────────── */
+
+.bpi-progress-bar {
+	width: 100%;
+	height: 6px;
+	background: #dcdcde;
+	border-radius: 3px;
+	overflow: hidden;
+	margin-top: 6px;
+}
+
+.bpi-progress-bar__fill {
+	height: 100%;
+	background: #2271b1;
+	border-radius: 3px;
+	transition: width 0.15s ease;
+	width: 0;
+}
+
+/* ── Action Buttons ──────────────────────────────────────── */
+
+.bpi-actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-wrap: wrap;
+	margin: 16px 0;
+}
+
+.bpi-actions .button-primary:disabled,
+.bpi-actions .button-primary[disabled] {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* ── Notices ─────────────────────────────────────────────── */
+
+.bpi-notice {
+	padding: 8px 12px;
+	margin: 8px 0;
+	border-left: 4px solid;
+	background: #fff;
+	font-size: 13px;
+}
+
+.bpi-notice--error {
+	border-color: #d63638;
+	color: #d63638;
+}
+
+.bpi-notice--info {
+	border-color: #72aee6;
+	color: #50575e;
+}
+
+.bpi-notice--warning {
+	border-color: #dba617;
+	color: #50575e;
+}
+
+/* ── Empty State ─────────────────────────────────────────── */
+
+.bpi-queue-empty {
+	text-align: center;
+	padding: 20px;
+	color: #787c82;
+	font-style: italic;
+	font-size: 13px;
+}
+
+/* ── Screen Reader Text ──────────────────────────────────── */
+
+.bpi-sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+
+@media screen and (max-width: 960px) {
+	.bpi-upload-zone {
+		padding: 30px 16px;
+	}
+
+	.bpi-queue-item {
+		flex-wrap: wrap;
+	}
+
+	.bpi-queue-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.bpi-upload-zone {
+		padding: 24px 12px;
+	}
+
+	.bpi-upload-zone__icon {
+		font-size: 36px;
+	}
+
+	.bpi-actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.bpi-actions .button {
+		text-align: center;
+	}
+}
+
+/* ── Preview Screen ──────────────────────────────────────── */
+
+.bpi-preview-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 20px 0 16px;
+}
+
+.bpi-preview-header h2 {
+	margin: 0;
+	font-size: 1.3em;
+}
+
+.bpi-preview-controls {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	flex-wrap: wrap;
+}
+
+.bpi-preview-controls__sep {
+	color: #c3c4c7;
+}
+
+.bpi-preview-count {
+	font-size: 13px;
+	color: #50575e;
+	margin-left: 8px;
+}
+
+/* ── Preview List ────────────────────────────────────────── */
+
+.bpi-preview-list {
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	margin: 0 0 16px;
+}
+
+.bpi-preview-item {
+	display: flex;
+	align-items: flex-start;
+	padding: 14px 12px;
+	border-bottom: 1px solid #f0f0f1;
+	gap: 12px;
+}
+
+.bpi-preview-item:last-child {
+	border-bottom: none;
+}
+
+.bpi-preview-item--incompatible {
+	background: #fef8ee;
+}
+
+.bpi-preview-item__check {
+	flex-shrink: 0;
+	padding-top: 2px;
+}
+
+.bpi-preview-item__check input[type="checkbox"] {
+	margin: 0;
+	width: 18px;
+	height: 18px;
+}
+
+.bpi-preview-item__info {
+	flex: 1;
+	min-width: 0;
+}
+
+.bpi-preview-item__title {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+	font-size: 14px;
+	line-height: 1.4;
+}
+
+.bpi-preview-item__versions {
+	font-size: 12px;
+	color: #50575e;
+	margin-top: 4px;
+}
+
+.bpi-preview-item__author {
+	font-size: 12px;
+	color: #787c82;
+	margin-top: 2px;
+}
+
+.bpi-preview-item__desc {
+	font-size: 13px;
+	color: #50575e;
+	margin-top: 6px;
+	line-height: 1.5;
+}
+
+.bpi-preview-item__meta {
+	display: flex;
+	gap: 12px;
+	margin-top: 6px;
+	flex-wrap: wrap;
+}
+
+.bpi-meta-tag {
+	font-size: 12px;
+	color: #787c82;
+	background: #f0f0f1;
+	padding: 2px 8px;
+	border-radius: 3px;
+}
+
+.bpi-preview-item__activate {
+	flex-shrink: 0;
+	padding-top: 2px;
+}
+
+.bpi-toggle-label {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	cursor: pointer;
+	white-space: nowrap;
+	font-size: 12px;
+	color: #50575e;
+}
+
+.bpi-toggle-text {
+	font-size: 12px;
+}
+
+/* ── Version & Action Badges ─────────────────────────────── */
+
+.bpi-version-badge {
+	font-size: 11px;
+	background: #f0f0f1;
+	color: #50575e;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-weight: normal;
+}
+
+.bpi-update-badge {
+	font-size: 11px;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.bpi-update-badge--major {
+	background: #fcf0f1;
+	color: #d63638;
+}
+
+.bpi-update-badge--minor {
+	background: #fef8ee;
+	color: #996800;
+}
+
+.bpi-update-badge--patch {
+	background: #edfaef;
+	color: #007017;
+}
+
+.bpi-action-label {
+	font-size: 11px;
+	padding: 1px 6px;
+	border-radius: 3px;
+	font-weight: 600;
+}
+
+.bpi-action-label--install {
+	background: #e7f1fb;
+	color: #2271b1;
+}
+
+.bpi-action-label--update {
+	background: #fef8ee;
+	color: #996800;
+}
+
+/* ── Compatibility Warnings ──────────────────────────────── */
+
+.bpi-preview-item__warnings {
+	margin-top: 8px;
+}
+
+.bpi-compat-warning {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: #996800;
+	margin-bottom: 4px;
+}
+
+.bpi-warning-icon {
+	color: #dba617;
+	font-size: 16px;
+	flex-shrink: 0;
+}
+
+.bpi-override-compat {
+	font-size: 12px;
+	color: #2271b1;
+	margin-top: 4px;
+}
+
+.bpi-override-compat:hover,
+.bpi-override-compat:focus {
+	color: #135e96;
+	text-decoration: underline;
+}
+
+/* ── Changelog Section ───────────────────────────────────── */
+
+.bpi-changelog-section {
+	margin-top: 8px;
+	border: 1px solid #e0e0e0;
+	border-radius: 3px;
+}
+
+.bpi-changelog-toggle {
+	padding: 6px 10px;
+	font-size: 12px;
+	color: #2271b1;
+	cursor: pointer;
+	user-select: none;
+}
+
+.bpi-changelog-toggle:hover {
+	color: #135e96;
+}
+
+.bpi-changelog-content {
+	padding: 8px 10px;
+	font-size: 12px;
+	color: #50575e;
+	border-top: 1px solid #e0e0e0;
+}
+
+.bpi-changelog-entry {
+	margin-bottom: 8px;
+}
+
+.bpi-changelog-entry:last-child {
+	margin-bottom: 0;
+}
+
+.bpi-changelog-entry ul {
+	margin: 4px 0 0 16px;
+	padding: 0;
+}
+
+.bpi-changelog-entry li {
+	margin-bottom: 2px;
+}
+
+.bpi-changelog-empty {
+	padding: 8px 10px;
+	font-size: 12px;
+	color: #787c82;
+	font-style: italic;
+	margin: 0;
+	border-top: 1px solid #e0e0e0;
+}
+
+/* ── Preview Action Buttons ──────────────────────────────── */
+
+.bpi-preview-actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-wrap: wrap;
+	margin: 16px 0;
+}
+
+.bpi-preview-actions .button-primary:disabled,
+.bpi-preview-actions .button-primary[disabled],
+.bpi-preview-actions .button-secondary:disabled,
+.bpi-preview-actions .button-secondary[disabled] {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* ── Preview Responsive ──────────────────────────────────── */
+
+@media screen and (max-width: 960px) {
+	.bpi-preview-item {
+		flex-wrap: wrap;
+	}
+
+	.bpi-preview-item__activate {
+		width: 100%;
+		margin-top: 8px;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.bpi-preview-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.bpi-preview-actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.bpi-preview-actions .button {
+		text-align: center;
+	}
+
+	.bpi-preview-item__title {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+/* ── Processing Screen ───────────────────────────────────── */
+
+.bpi-processing-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 20px 0 16px;
+}
+
+.bpi-processing-header h2 {
+	margin: 0;
+	font-size: 1.3em;
+}
+
+.bpi-processing-spinner {
+	font-size: 24px;
+	color: #2271b1;
+}
+
+@keyframes bpi-spin {
+	from { transform: rotate(0deg); }
+	to { transform: rotate(360deg); }
+}
+
+.bpi-spin {
+	animation: bpi-spin 1.2s linear infinite;
+	display: inline-block;
+}
+
+.bpi-processing-list {
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	margin: 0 0 16px;
+}
+
+.bpi-processing-item {
+	display: flex;
+	align-items: center;
+	padding: 12px;
+	border-bottom: 1px solid #f0f0f1;
+	gap: 10px;
+	transition: background-color 0.2s;
+}
+
+.bpi-processing-item:last-child {
+	border-bottom: none;
+}
+
+.bpi-processing-item__icon {
+	font-size: 20px;
+	flex-shrink: 0;
+	width: 20px;
+	height: 20px;
+}
+
+.bpi-processing-item--pending .bpi-processing-item__icon {
+	color: #787c82;
+}
+
+.bpi-processing-item--installing {
+	background: #f0f6fc;
+}
+
+.bpi-processing-item--installing .bpi-processing-item__icon {
+	color: #2271b1;
+}
+
+.bpi-processing-item--success {
+	background: #edfaef;
+}
+
+.bpi-processing-item--success .bpi-processing-item__icon {
+	color: #00a32a;
+}
+
+.bpi-processing-item--failed {
+	background: #fcf0f1;
+}
+
+.bpi-processing-item--failed .bpi-processing-item__icon {
+	color: #d63638;
+}
+
+.bpi-processing-item__info {
+	flex: 1;
+	min-width: 0;
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.bpi-processing-item__status {
+	font-size: 13px;
+	font-weight: 600;
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+.bpi-processing-item--pending .bpi-processing-item__status {
+	color: #787c82;
+}
+
+.bpi-processing-item--installing .bpi-processing-item__status {
+	color: #2271b1;
+}
+
+.bpi-processing-item--success .bpi-processing-item__status {
+	color: #00a32a;
+}
+
+.bpi-processing-item--failed .bpi-processing-item__status {
+	color: #d63638;
+}
+
+/* ── Results Screen ──────────────────────────────────────── */
+
+.bpi-results-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 20px 0 16px;
+}
+
+.bpi-results-header h2 {
+	margin: 0;
+	font-size: 1.3em;
+}
+
+.bpi-results-header__icon {
+	font-size: 28px;
+	color: #787c82;
+}
+
+.bpi-results-header__icon--success {
+	color: #00a32a;
+}
+
+/* ── Summary Cards ───────────────────────────────────────── */
+
+.bpi-results-summary {
+	display: flex;
+	gap: 12px;
+	margin-bottom: 16px;
+	flex-wrap: wrap;
+}
+
+.bpi-summary-card {
+	flex: 1;
+	min-width: 100px;
+	padding: 16px;
+	border-radius: 4px;
+	text-align: center;
+	border: 1px solid #c3c4c7;
+	background: #fff;
+}
+
+.bpi-summary-card__count {
+	display: block;
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.bpi-summary-card__label {
+	display: block;
+	font-size: 13px;
+	color: #50575e;
+	margin-top: 4px;
+}
+
+.bpi-summary-card--installed .bpi-summary-card__count {
+	color: #00a32a;
+}
+
+.bpi-summary-card--updated .bpi-summary-card__count {
+	color: #2271b1;
+}
+
+.bpi-summary-card--failed .bpi-summary-card__count {
+	color: #d63638;
+}
+
+/* ── Results List ────────────────────────────────────────── */
+
+.bpi-results-list {
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	margin: 0 0 16px;
+}
+
+.bpi-results-item {
+	display: flex;
+	align-items: flex-start;
+	padding: 12px;
+	border-bottom: 1px solid #f0f0f1;
+	gap: 10px;
+}
+
+.bpi-results-item:last-child {
+	border-bottom: none;
+}
+
+.bpi-results-item__icon {
+	font-size: 20px;
+	flex-shrink: 0;
+	margin-top: 1px;
+}
+
+.bpi-results-item--success .bpi-results-item__icon {
+	color: #00a32a;
+}
+
+.bpi-results-item--failed .bpi-results-item__icon {
+	color: #d63638;
+}
+
+.bpi-results-item__info {
+	flex: 1;
+	min-width: 0;
+}
+
+.bpi-results-item__status-text {
+	font-size: 12px;
+	font-weight: 600;
+	padding: 1px 6px;
+	border-radius: 3px;
+}
+
+.bpi-results-item--success .bpi-results-item__status-text {
+	background: #edfaef;
+	color: #00a32a;
+}
+
+.bpi-results-item--failed .bpi-results-item__status-text {
+	background: #fcf0f1;
+	color: #d63638;
+}
+
+.bpi-results-item__messages {
+	margin-top: 6px;
+	font-size: 13px;
+	color: #50575e;
+}
+
+.bpi-results-item__messages p {
+	margin: 2px 0;
+}
+
+.bpi-results-item__rolled-back {
+	display: inline-block;
+	margin-top: 4px;
+	font-size: 11px;
+	padding: 1px 6px;
+	border-radius: 3px;
+	background: #fef8ee;
+	color: #996800;
+	font-weight: 600;
+}
+
+/* ── Results Actions ─────────────────────────────────────── */
+
+.bpi-results-actions {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-wrap: wrap;
+	margin: 16px 0;
+}
+
+/* ── Processing & Results Responsive ─────────────────────── */
+
+@media screen and (max-width: 960px) {
+	.bpi-processing-item {
+		flex-wrap: wrap;
+	}
+
+	.bpi-results-summary {
+		flex-direction: column;
+	}
+
+	.bpi-summary-card {
+		min-width: auto;
+	}
+}
+
+@media screen and (max-width: 768px) {
+	.bpi-processing-header,
+	.bpi-results-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.bpi-results-actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.bpi-results-actions .button {
+		text-align: center;
+	}
+
+	.bpi-processing-item__info {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+/* ── Focus Visible Indicators (Keyboard Accessibility) ───── */
+
+.bpi-upload-zone:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+	border-color: #2271b1;
+	background: #f0f6fc;
+}
+
+.bpi-queue-item__remove:focus-visible {
+	outline: 2px solid #d63638;
+	outline-offset: 1px;
+	background: #fcf0f1;
+}
+
+.bpi-preview-checkbox:focus-visible,
+.bpi-activate-toggle:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+
+#bpi-select-all:focus-visible,
+#bpi-deselect-all:focus-visible,
+.bpi-override-compat:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 1px;
+}
+
+.bpi-changelog-toggle:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: -2px;
+}
+
+.bpi-actions .button:focus-visible,
+.bpi-preview-actions .button:focus-visible,
+.bpi-results-actions .button:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+/* Headings that receive programmatic focus should not show outline */
+h2[tabindex="-1"]:focus {
+	outline: none;
+}
+
+/* ── Text Overflow Handling ──────────────────────────────── */
+
+.bpi-preview-item__desc,
+.bpi-results-item__messages p {
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+}
+
+.bpi-preview-item__info,
+.bpi-processing-item__info,
+.bpi-results-item__info {
+	overflow: hidden;
+}
+
+.bpi-preview-item__info strong,
+.bpi-processing-item__info strong,
+.bpi-results-item__info strong {
+	overflow-wrap: break-word;
+	word-wrap: break-word;
+}
+
+/* ── Wide Viewport Constraint ────────────────────────────── */
+
+#bpi-bulk-upload-app {
+	max-width: 1200px;
+}
+
+/* ── Network Activate Toggle ─────────────────────────────── */
+
+.bpi-preview-item__network-activate {
+	flex-shrink: 0;
+	padding-top: 2px;
+}
+
+.bpi-preview-item__network-activate .bpi-toggle-label {
+	color: #2271b1;
+}
+
+.bpi-preview-item__network-activate .bpi-toggle-text {
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.bpi-network-activate-toggle:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+}
+
+@media screen and (max-width: 960px) {
+	.bpi-preview-item__network-activate {
+		width: 100%;
+		margin-top: 8px;
+	}
+}

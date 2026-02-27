@@ -1,0 +1,37 @@
+# Label configuration for actions/labeler
+# See: https://github.com/actions/labeler
+
+php:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'includes/**/*.php'
+          - 'bulk-plugin-installer.php'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'tests/**'
+          - 'phpunit.xml.dist'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/**'
+
+assets:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'assets/**'
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '*.md'
+          - 'CONTRIBUTING.md'
+          - 'languages/**'
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'composer.json'
+          - 'composer.lock'

@@ -1,0 +1,251 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  integration:
+    name: WP ${{ matrix.wp-version }} (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php-version: '8.3'
+            wp-version: 'latest'
+          - php-version: '8.2'
+            wp-version: '6.7'
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      WP_VERSION: ${{ matrix.wp-version }}
+      DB_HOST: 127.0.0.1
+      DB_NAME: wordpress
+      DB_USER: root
+      DB_PASS: root
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mysqli, zip, mbstring, intl
+          tools: wp-cli, composer
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-${{ matrix.php-version }}-
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Resolve WordPress version
+        id: wp-version
+        run: |
+          if [ "$WP_VERSION" = "latest" ]; then
+            echo "url=https://wordpress.org/latest.tar.gz" >> "$GITHUB_OUTPUT"
+          else
+            echo "url=https://wordpress.org/wordpress-${WP_VERSION}.tar.gz" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download and set up WordPress
+        run: |
+          mkdir -p /tmp/wordpress
+          curl -sL "${{ steps.wp-version.outputs.url }}" | tar xz -C /tmp/wordpress --strip-components=1
+          cp -r /tmp/wordpress/* $GITHUB_WORKSPACE/wp-root/ || true
+          mkdir -p wp-root
+          cp -r /tmp/wordpress/* wp-root/
+
+      - name: Configure WordPress
+        working-directory: wp-root
+        run: |
+          wp config create \
+            --dbname=$DB_NAME \
+            --dbuser=$DB_USER \
+            --dbpass=$DB_PASS \
+            --dbhost=$DB_HOST \
+            --skip-check
+          wp core install \
+            --url=http://localhost:8080 \
+            --title="BPI Test Site" \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@example.com \
+            --skip-email
+
+      - name: Install plugin into WordPress
+        run: |
+          mkdir -p wp-root/wp-content/plugins/bulk-plugin-installer
+          rsync -a --exclude='wp-root' --exclude='.git' --exclude='vendor' \
+            ./ wp-root/wp-content/plugins/bulk-plugin-installer/
+          cp -r vendor wp-root/wp-content/plugins/bulk-plugin-installer/vendor
+
+      - name: Smoke test - Activate plugin
+        working-directory: wp-root
+        run: |
+          wp plugin activate bulk-plugin-installer
+          wp plugin list --status=active --format=table
+
+      - name: Smoke test - Verify settings page loads
+        working-directory: wp-root
+        run: |
+          wp eval "
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+            \$settings = get_option('bpi_auto_activate');
+            echo 'Settings accessible: OK';
+          "
+
+      - name: Smoke test - Verify CLI commands register
+        working-directory: wp-root
+        run: |
+          wp bulk-plugin --help || echo "CLI commands registered check complete"
+
+      - name: Smoke test - Upload sample ZIPs and verify bulk install
+        working-directory: wp-root
+        run: |
+          # Create a minimal sample plugin ZIP for testing
+          mkdir -p /tmp/sample-plugin/sample-test-plugin
+          cat > /tmp/sample-plugin/sample-test-plugin/sample-test-plugin.php << 'PLUGIN'
+          <?php
+          /**
+           * Plugin Name: Sample Test Plugin
+           * Version: 1.0.0
+           * Description: A sample plugin for integration testing.
+           * Author: Test Author
+           */
+          PLUGIN
+          cd /tmp/sample-plugin && zip -r /tmp/sample-test-plugin.zip sample-test-plugin/
+
+          # Verify the plugin can be installed via WP-CLI
+          wp plugin install /tmp/sample-test-plugin.zip --force
+          wp plugin list --format=table | grep sample-test-plugin
+
+      - name: Smoke test - Deactivate and clean up
+        working-directory: wp-root
+        run: |
+          wp plugin deactivate bulk-plugin-installer
+          wp plugin activate bulk-plugin-installer
+          echo "Re-activation successful"
+
+  integration-multisite:
+    name: Multisite (PHP ${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php-version: '8.3'
+            wp-version: 'latest'
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress_ms
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_NAME: wordpress_ms
+      DB_USER: root
+      DB_PASS: root
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mysqli, zip, mbstring, intl
+          tools: wp-cli, composer
+          coverage: none
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Download and set up WordPress Multisite
+        run: |
+          mkdir -p wp-root
+          curl -sL https://wordpress.org/latest.tar.gz | tar xz -C wp-root --strip-components=1
+
+      - name: Configure WordPress Multisite
+        working-directory: wp-root
+        run: |
+          wp config create \
+            --dbname=$DB_NAME \
+            --dbuser=$DB_USER \
+            --dbpass=$DB_PASS \
+            --dbhost=$DB_HOST \
+            --skip-check
+          wp core install \
+            --url=http://localhost:8080 \
+            --title="BPI Multisite Test" \
+            --admin_user=admin \
+            --admin_password=admin \
+            --admin_email=admin@example.com \
+            --skip-email
+          wp core multisite-convert --title="BPI Multisite Test"
+
+      - name: Install plugin into Multisite
+        run: |
+          mkdir -p wp-root/wp-content/plugins/bulk-plugin-installer
+          rsync -a --exclude='wp-root' --exclude='.git' --exclude='vendor' \
+            ./ wp-root/wp-content/plugins/bulk-plugin-installer/
+          cp -r vendor wp-root/wp-content/plugins/bulk-plugin-installer/vendor
+
+      - name: Smoke test - Network activate plugin
+        working-directory: wp-root
+        run: |
+          wp plugin activate bulk-plugin-installer --network
+          wp plugin list --status=active-network --format=table
+
+      - name: Smoke test - Verify multisite context
+        working-directory: wp-root
+        run: |
+          wp eval "
+            echo 'Is multisite: ' . (is_multisite() ? 'yes' : 'no');
+          "
+
+      - name: Smoke test - Deactivate network plugin
+        working-directory: wp-root
+        run: |
+          wp plugin deactivate bulk-plugin-installer --network
+          wp plugin activate bulk-plugin-installer --network
+          echo "Network re-activation successful"

@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: zip, mbstring, intl
+          tools: wp-cli, composer
+          coverage: none
+
+      - name: Install production dependencies
+        run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
+
+      - name: Generate POT file
+        run: |
+          mkdir -p languages
+          if command -v wp &> /dev/null; then
+            wp i18n make-pot . languages/bulk-plugin-installer.pot \
+              --slug=bulk-plugin-installer \
+              --domain=bulk-plugin-installer \
+              --exclude=tests,vendor,.github,.kiro \
+              --skip-js
+          else
+            echo "WP-CLI not available, skipping POT generation"
+          fi
+
+      - name: Extract version from tag
+        id: version
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+
+      - name: Build plugin ZIP
+        run: |
+          PLUGIN_DIR="bulk-plugin-installer"
+          BUILD_DIR="/tmp/build/${PLUGIN_DIR}"
+          mkdir -p "${BUILD_DIR}"
+
+          # Copy plugin files, excluding dev/CI artifacts
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.kiro' \
+            --exclude='.vscode' \
+            --exclude='tests' \
+            --exclude='phpunit.xml.dist' \
+            --exclude='.phpunit.result.cache' \
+            --exclude='composer.phar' \
+            --exclude='composer.lock' \
+            --exclude='wp-root' \
+            --exclude='wp-content' \
+            --exclude='node_modules' \
+            --exclude='.gitignore' \
+            --exclude='CONTRIBUTING.md' \
+            ./ "${BUILD_DIR}/"
+
+          cd /tmp/build
+          zip -r "/tmp/${PLUGIN_DIR}-${{ steps.version.outputs.tag }}.zip" "${PLUGIN_DIR}/"
+
+      - name: Generate changelog from commits
+        id: changelog
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGELOG=$(git log "${PREVIOUS_TAG}..HEAD" --pretty=format:"- %s (%h)" --no-merges)
+          else
+            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges -50)
+          fi
+
+          # Write to file for the release body
+          {
+            echo "## What's Changed"
+            echo ""
+            echo "${CHANGELOG}"
+            echo ""
+            echo "---"
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${{ steps.version.outputs.tag }}"
+          } > /tmp/changelog.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: /tmp/changelog.md
+          files: /tmp/bulk-plugin-installer-${{ steps.version.outputs.tag }}.zip
+          generate_release_notes: true
+          fail_on_unmatched_files: true
