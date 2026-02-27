@@ -83,12 +83,15 @@ The test suite includes 458 tests with 60,000+ assertions:
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for guidelines.
 
 ## Security
 
-See [SECURITY.md](SECURITY.md) for reporting vulnerabilities.
+See [SECURITY.md](.github/SECURITY.md) for reporting vulnerabilities.
 
 ## License
 
 GPL-2.0-or-later. See [LICENSE](LICENSE) for the full text.
+
+AI Usage Disclaimer
+Portions of this codebase were generated with the assistance of Large Language Models (LLMs). All AI-generated code has been reviewed and tested to ensure quality and correctness.
