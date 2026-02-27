@@ -16,15 +16,14 @@ on:
   schedule:
     - cron: '0 6 * * 1' # Weekly on Monday at 06:00 UTC
 
-permissions:
-  actions: read
-  contents: read
-  security-events: write
+permissions: {}
 
 jobs:
   composer-audit:
     name: Composer Audit
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -46,6 +45,8 @@ jobs:
   security-sniffs:
     name: WordPress VIP Security Sniffs
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -86,6 +87,8 @@ jobs:
   gitguardian:
     name: GitGuardian Secret Scanning
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     if: github.event_name != 'schedule'
 
     steps:
@@ -103,6 +106,8 @@ jobs:
   snyk:
     name: Snyk Vulnerability Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -129,6 +134,10 @@ jobs:
   sonarqube:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
 
     steps:
       - name: Checkout code
