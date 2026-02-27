@@ -9,6 +9,7 @@ on:
       - '.github/workflows/lint.yml'
       - 'phpstan.neon'
       - 'phpmd-ruleset.xml'
+      - 'phpcs.xml.dist'
   pull_request:
     branches: [main]
     paths:
@@ -17,6 +18,7 @@ on:
       - '.github/workflows/lint.yml'
       - 'phpstan.neon'
       - 'phpmd-ruleset.xml'
+      - 'phpcs.xml.dist'
 
 jobs:
   phpcs:
@@ -67,12 +69,8 @@ jobs:
       - name: Run PHPCS with WordPress standards
         run: |
           ~/.composer/vendor/bin/phpcs \
-            --standard=WordPress \
-            --extensions=php \
-            --ignore=vendor/,tests/,node_modules/ \
             --report=checkstyle \
-            -q \
-            includes/ bulk-plugin-installer.php | cs2pr
+            -q | cs2pr
 
   phpmd:
     name: PHPMD (PHP ${{ matrix.php-version }})

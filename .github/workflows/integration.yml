@@ -150,7 +150,7 @@ jobs:
            * Author: Test Author
            */
           PLUGIN
-          cd /tmp/sample-plugin && zip -r /tmp/sample-test-plugin.zip sample-test-plugin/
+          (cd /tmp/sample-plugin && zip -r /tmp/sample-test-plugin.zip sample-test-plugin/)
 
           # Verify the plugin can be installed via WP-CLI
           wp plugin install /tmp/sample-test-plugin.zip --force
