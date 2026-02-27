@@ -206,10 +206,10 @@ class BootstrapTest extends TestCase {
         // The autoloader should map BPILogManager to includes/class-bpi-log-manager.php.
         // We can't test the actual loading without the file, but we can verify
         // the function exists and doesn't error on unknown classes.
-        $this->assertTrue( function_exists( 'bpi_autoloader' ) );
+        $this->assertTrue( function_exists( 'bpiAutoloader' ) );
 
         // Should not throw for non-BPI classes.
-        bpi_autoloader( 'SomeOtherClass' );
+        bpiAutoloader( 'SomeOtherClass' );
         $this->assertTrue( true ); // If we get here, no error was thrown.
     }
 

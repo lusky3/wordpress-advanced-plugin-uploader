@@ -29,7 +29,7 @@ define( 'BPI_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'BPI_PLUGIN_BASENAME', plugin_basename( __FILE__ ) );
 
 // Autoloader for classes in the includes/ directory.
-spl_autoload_register( 'bpi_autoloader' );
+spl_autoload_register( 'bpiAutoloader' );
 
 /**
  * Autoload classes from the includes/ directory.
@@ -39,7 +39,7 @@ spl_autoload_register( 'bpi_autoloader' );
  *
  * @param string $class_name The fully-qualified class name.
  */
-function bpi_autoloader( string $class_name ): void {
+function bpiAutoloader( string $class_name ): void {
     // Only handle classes starting with "BPI" or the main bootstrap class.
     if ( ! str_starts_with( $class_name, 'BPI' ) && $class_name !== 'BulkPluginInstaller' ) {
         return;
