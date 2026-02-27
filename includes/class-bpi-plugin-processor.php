@@ -508,7 +508,7 @@ class BPIPluginProcessor {
             $result['is_dry_run'] = true;
             $result['compatibility_issues'] = array(
                 sprintf(
-                    __( 'Requires PHP %s (current: %s).', 'bulk-plugin-installer' ),
+                    __( 'Requires PHP %1$s (current: %2$s).', 'bulk-plugin-installer' ),
                     $requires_php,
                     PHP_VERSION
                 ),

@@ -111,10 +111,12 @@
 		<exclude name="Universal.Files.SeparateFunctionsFromOO"/>
 
 		<!--
-			PHP tag formatting.
+			PHP tag formatting — inline PHP in HTML templates is standard WordPress.
 		-->
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeOpen"/>
 		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterEnd"/>
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentBeforeEnd"/>
+		<exclude name="Squiz.PHP.EmbeddedPhp.ContentAfterOpen"/>
 
 		<!--
 			DB prepare — handled via phpcs:ignore inline where needed.
