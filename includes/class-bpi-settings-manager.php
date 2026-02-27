@@ -49,13 +49,14 @@ class BPISettingsManager {
      * @var array<string, mixed>
      */
     private const DEFAULTS = array(
-        'bpi_auto_activate'       => false,
-        'bpi_max_plugins'         => 20,
-        'bpi_auto_rollback'       => true,
-        'bpi_max_file_size'       => 0,
-        'bpi_rollback_retention'  => 24,
-        'bpi_email_notifications' => false,
-        'bpi_email_recipients'    => '',
+        'bpi_auto_activate'            => false,
+        'bpi_max_plugins'              => 20,
+        'bpi_auto_rollback'            => true,
+        'bpi_max_file_size'            => 0,
+        'bpi_rollback_retention'       => 24,
+        'bpi_email_notifications'      => false,
+        'bpi_email_recipients'         => '',
+        'bpi_delete_data_on_uninstall' => false,
     );
 
     /**
@@ -170,6 +171,18 @@ class BPISettingsManager {
                 'placeholder' => 'admin@example.com, dev@example.com',
             )
         );
+
+        add_settings_field(
+            'bpi_delete_data_on_uninstall',
+            __( 'Delete Data on Uninstall', 'bulk-plugin-installer' ),
+            array( $this, 'renderCheckboxField' ),
+            self::PAGE_SLUG,
+            self::SECTION_ID,
+            array(
+                'key'         => 'bpi_delete_data_on_uninstall',
+                'description' => __( 'Remove all plugin data (settings, logs, profiles) when the plugin is deleted. If unchecked, data is preserved for future reinstallation.', 'bulk-plugin-installer' ),
+            )
+        );
     }
 
     /**
@@ -209,6 +222,7 @@ class BPISettingsManager {
         );
         $sanitized['bpi_email_notifications'] = ! empty( $input['bpi_email_notifications'] );
         $sanitized['bpi_email_recipients']    = $this->sanitizeEmailRecipients( $input );
+        $sanitized['bpi_delete_data_on_uninstall'] = ! empty( $input['bpi_delete_data_on_uninstall'] );
 
         // Persist each setting as an individual option.
         foreach ( $sanitized as $key => $value ) {

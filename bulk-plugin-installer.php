@@ -194,13 +194,14 @@ class BulkPluginInstaller {
 
         // Set default options if they don't already exist.
         $defaults = array(
-            'bpi_auto_activate'      => false,
-            'bpi_max_plugins'        => 20,
-            'bpi_auto_rollback'      => true,
-            'bpi_max_file_size'      => 0, // 0 means use server default.
-            'bpi_rollback_retention' => 24,
-            'bpi_email_notifications' => false,
-            'bpi_email_recipients'   => '',
+            'bpi_auto_activate'            => false,
+            'bpi_max_plugins'              => 20,
+            'bpi_auto_rollback'            => true,
+            'bpi_max_file_size'            => 0, // 0 means use server default.
+            'bpi_rollback_retention'       => 24,
+            'bpi_email_notifications'      => false,
+            'bpi_email_recipients'         => '',
+            'bpi_delete_data_on_uninstall' => false,
         );
 
         foreach ( $defaults as $key => $value ) {
@@ -252,6 +253,7 @@ class BulkPluginInstaller {
             'bpi_rollback_retention',
             'bpi_email_notifications',
             'bpi_email_recipients',
+            'bpi_delete_data_on_uninstall',
             'bpi_profiles',
             'bpi_active_batches',
         );
