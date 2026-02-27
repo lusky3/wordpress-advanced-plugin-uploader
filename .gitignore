@@ -65,12 +65,7 @@ coverage.xml
 .antigravity/*
 .claude/*
 .cursor/*
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
+.vscode/
 !*.code-workspace
 
 # Built Visual Studio Code Extensions
