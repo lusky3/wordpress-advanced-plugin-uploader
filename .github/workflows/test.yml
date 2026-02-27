@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
       matrix:
         php-version: ['8.2', '8.3', '8.4', '8.5']
-        wp-version: ['latest', '6.7', '6.8', '6.9']
+        wp-version: ['6.7', '6.8', '6.9']
 
     env:
       WP_VERSION: ${{ matrix.wp-version }}
@@ -66,7 +66,7 @@ jobs:
         run: vendor/bin/phpunit --testsuite property --coverage-clover=coverage-property.xml
 
       - name: Upload coverage reports
-        if: matrix.php-version == '8.4' && matrix.wp-version == 'latest'
+        if: matrix.php-version == '8.4' && matrix.wp-version == '6.9'
         uses: actions/upload-artifact@v7
         with:
           name: coverage-reports-${{ matrix.php-version }}-${{ matrix.wp-version }}
@@ -76,7 +76,7 @@ jobs:
           retention-days: 7
 
       - name: Upload coverage to Codecov
-        if: matrix.php-version == '8.4' && matrix.wp-version == 'latest' && env.CODECOV_TOKEN != ''
+        if: matrix.php-version == '8.4' && matrix.wp-version == '6.9' && env.CODECOV_TOKEN != ''
         uses: codecov/codecov-action@v5
         with:
           files: coverage-unit.xml,coverage-property.xml
@@ -87,7 +87,7 @@ jobs:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload coverage to qlty.sh
-        if: matrix.php-version == '8.4' && matrix.wp-version == 'latest' && env.QLTY_COVERAGE_TOKEN != ''
+        if: matrix.php-version == '8.4' && matrix.wp-version == '6.9' && env.QLTY_COVERAGE_TOKEN != ''
         uses: qltysh/qlty-action/coverage@v2
         with:
           token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
