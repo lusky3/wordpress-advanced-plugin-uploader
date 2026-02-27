@@ -5,7 +5,7 @@
  * Description:       Upload and install multiple WordPress plugin ZIP files in a single operation with preview, rollback, and profile support.
  * Version:           1.0.0
  * Requires at least: 5.8
- * Requires PHP:      8.1
+ * Requires PHP:      8.2
  * Author:            Bulk Plugin Installer Contributors
  * Author URI:        https://github.com/bulk-plugin-installer
  * License:           GPL-2.0-or-later
@@ -243,34 +243,6 @@ class BulkPluginInstaller {
      *
      * Removes all options, drops the log table, and deletes backup files.
      */
-    public function uninstall(): void {
-        // Remove all plugin options.
-        $options = array(
-            'bpi_auto_activate',
-            'bpi_max_plugins',
-            'bpi_auto_rollback',
-            'bpi_max_file_size',
-            'bpi_rollback_retention',
-            'bpi_email_notifications',
-            'bpi_email_recipients',
-            'bpi_delete_data_on_uninstall',
-            'bpi_profiles',
-            'bpi_active_batches',
-        );
-
-        foreach ( $options as $option ) {
-            delete_option( $option );
-        }
-
-        // Drop the log table.
-        if ( class_exists( 'BPILogManager' ) ) {
-            $log_manager = new BPILogManager();
-            $log_manager->dropTable();
-        }
-
-        // Clean up transients.
-        $this->deactivate();
-    }
 
     /**
      * Recursively remove a directory and its contents.

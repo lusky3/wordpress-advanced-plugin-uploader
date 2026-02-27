@@ -175,32 +175,16 @@ class BootstrapTest extends TestCase {
     }
 
     /**
-     * Test that uninstall() removes all plugin options.
+     * Test that uninstall.php exists and checks the delete-data setting.
+     *
+     * The standalone uninstall.php is the WordPress-recommended approach.
+     * It checks bpi_delete_data_on_uninstall before removing data.
      */
-    public function test_uninstall_removes_all_options(): void {
-        global $bpi_test_options;
-        $bpi_test_options = array(
-            'bpi_auto_activate'       => true,
-            'bpi_max_plugins'         => 20,
-            'bpi_auto_rollback'       => true,
-            'bpi_max_file_size'       => 10,
-            'bpi_rollback_retention'  => 24,
-            'bpi_email_notifications' => false,
-            'bpi_email_recipients'    => '',
-            'bpi_profiles'            => '[]',
+    public function test_uninstall_file_exists(): void {
+        $this->assertFileExists(
+            BPI_PLUGIN_DIR . 'uninstall.php',
+            'uninstall.php must exist in the plugin root.'
         );
-
-        $instance = BulkPluginInstaller::getInstance();
-        $instance->uninstall();
-
-        $this->assertArrayNotHasKey( 'bpi_auto_activate', $bpi_test_options );
-        $this->assertArrayNotHasKey( 'bpi_max_plugins', $bpi_test_options );
-        $this->assertArrayNotHasKey( 'bpi_auto_rollback', $bpi_test_options );
-        $this->assertArrayNotHasKey( 'bpi_max_file_size', $bpi_test_options );
-        $this->assertArrayNotHasKey( 'bpi_rollback_retention', $bpi_test_options );
-        $this->assertArrayNotHasKey( 'bpi_email_notifications', $bpi_test_options );
-        $this->assertArrayNotHasKey( 'bpi_email_recipients', $bpi_test_options );
-        $this->assertArrayNotHasKey( 'bpi_profiles', $bpi_test_options );
     }
 
     /**

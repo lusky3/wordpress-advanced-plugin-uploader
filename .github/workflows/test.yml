@@ -13,13 +13,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['7.4', '8.0', '8.1', '8.2', '8.3']
+        php-version: ['8.2', '8.3', '8.4']
         wp-version: ['latest', '6.7']
         exclude:
-          # WordPress 6.7 requires PHP 7.2+, all versions compatible
-          # Exclude combinations that are known to be unsupported
-          - php-version: '7.4'
-            wp-version: 'latest'
+          # No exclusions needed — all PHP versions support all WP versions
 
     env:
       WP_VERSION: ${{ matrix.wp-version }}
@@ -59,7 +56,7 @@ jobs:
         run: vendor/bin/phpunit --testsuite property --coverage-clover=coverage-property.xml
 
       - name: Upload coverage reports
-        if: matrix.php-version == '8.3' && matrix.wp-version == 'latest'
+        if: matrix.php-version == '8.4' && matrix.wp-version == 'latest'
         uses: actions/upload-artifact@v7
         with:
           name: coverage-reports-${{ matrix.php-version }}-${{ matrix.wp-version }}

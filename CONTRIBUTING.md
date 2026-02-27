@@ -76,3 +76,4 @@ Examples:
 ## Security
 
 If you discover a security vulnerability, please report it responsibly by emailing the maintainers directly rather than opening a public issue.
+See [SECURITY.md](SECURITY.md) for details.
