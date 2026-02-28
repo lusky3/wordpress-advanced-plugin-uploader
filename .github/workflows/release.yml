@@ -53,23 +53,23 @@ jobs:
           BUILD_DIR="/tmp/build/${PLUGIN_DIR}"
           mkdir -p "${BUILD_DIR}"
 
-          # Copy plugin files, excluding dev/CI artifacts
-          rsync -a \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='.kiro' \
-            --exclude='.vscode' \
-            --exclude='tests' \
-            --exclude='phpunit.xml.dist' \
-            --exclude='.phpunit.result.cache' \
-            --exclude='composer.phar' \
-            --exclude='composer.lock' \
-            --exclude='wp-root' \
-            --exclude='wp-content' \
-            --exclude='node_modules' \
-            --exclude='.gitignore' \
-            --exclude='CONTRIBUTING.md' \
-            ./ "${BUILD_DIR}/"
+          # Allowlist: only copy files required for the plugin to run
+          cp bulk-plugin-installer.php "${BUILD_DIR}/"
+          cp uninstall.php "${BUILD_DIR}/"
+          cp readme.txt "${BUILD_DIR}/"
+          cp LICENSE "${BUILD_DIR}/"
+
+          cp -r includes/ "${BUILD_DIR}/includes/"
+          cp -r assets/ "${BUILD_DIR}/assets/"
+          cp -r languages/ "${BUILD_DIR}/languages/"
+
+          # Vendor (production only, already installed with --no-dev)
+          if [ -d vendor ]; then
+            cp -r vendor/ "${BUILD_DIR}/vendor/"
+          fi
+
+          # Remove any stray .gitkeep files
+          find "${BUILD_DIR}" -name '.gitkeep' -delete
 
           cd /tmp/build
           zip -r "/tmp/${PLUGIN_DIR}-${{ steps.version.outputs.tag }}.zip" "${PLUGIN_DIR}/"
