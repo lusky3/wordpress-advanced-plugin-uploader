@@ -847,6 +847,38 @@ if ( ! function_exists( 'size_format' ) ) {
 }
 
 
+if ( ! function_exists( 'wp_upload_dir' ) ) {
+    /**
+     * Stub for wp_upload_dir().
+     *
+     * @param string|null $time Optional time to base the upload directory on.
+     * @return array Upload directory data.
+     */
+    function wp_upload_dir( $time = null ): array { // NOSONAR
+        $base = sys_get_temp_dir() . '/bpi-wp-uploads';
+        return array(
+            'path'    => $base,
+            'url'     => 'https://example.com/wp-content/uploads',
+            'subdir'  => '',
+            'basedir' => $base,
+            'baseurl' => 'https://example.com/wp-content/uploads',
+            'error'   => false,
+        );
+    }
+}
+
+if ( ! function_exists( 'sanitize_file_name' ) ) {
+    /**
+     * Stub for sanitize_file_name().
+     *
+     * @param string $filename Filename to sanitize.
+     * @return string Sanitized filename.
+     */
+    function sanitize_file_name( string $filename ): string { // NOSONAR
+        return preg_replace( '/[^a-zA-Z0-9._-]/', '', $filename );
+    }
+}
+
 // ---- Filesystem stubs ----
 
 if ( ! function_exists( 'wp_mkdir_p' ) ) {

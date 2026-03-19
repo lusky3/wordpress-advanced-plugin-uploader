@@ -72,7 +72,7 @@ class BPIBulkUploader {
      * Verifies nonce and capability, validates the uploaded file,
      * and returns plugin data on success or error on failure.
      *
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings("PHPMD.CyclomaticComplexity")
      */
     public function handleUpload(): void {
         if ( ! $this->verifyAjaxRequest() ) {
