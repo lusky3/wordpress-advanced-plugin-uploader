@@ -24,6 +24,7 @@ jobs:
   phpcs:
     name: PHPCS (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.php-version == '8.5' }}
     strategy:
       fail-fast: false
       matrix:
@@ -76,6 +77,7 @@ jobs:
   phpmd:
     name: PHPMD (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.php-version == '8.5' }}
     strategy:
       fail-fast: false
       matrix:
@@ -114,6 +116,7 @@ jobs:
   phpstan:
     name: PHPStan (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.php-version == '8.5' }}
     strategy:
       fail-fast: false
       matrix:

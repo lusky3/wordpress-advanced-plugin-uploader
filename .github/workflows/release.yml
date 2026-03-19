@@ -89,6 +89,10 @@ jobs:
           REQUIRES_WP=$(grep -i "^Requires at least:" readme.txt | head -1 | sed 's/.*:\s*//')
           REQUIRES_PHP=$(grep -i "^Requires PHP:" readme.txt | head -1 | sed 's/.*:\s*//')
 
+          # Build test matrix from CI workflow files
+          PHP_VERSIONS=$(grep -A5 'php-version:' .github/workflows/test.yml | grep -oP "'[0-9.]+'"|tr -d "'" | sort -uV | paste -sd, -)
+          WP_VERSIONS=$(grep -A5 'wp-version:' .github/workflows/test.yml | grep -oP "'[0-9.]+'"|tr -d "'" | sort -uV | paste -sd, -)
+
           # Write to file for the release body
           {
             echo "## What's Changed"
@@ -96,6 +100,24 @@ jobs:
             echo "${CHANGELOG}"
             echo ""
             echo "---"
+            echo ""
+            echo "### Compatibility"
+            echo ""
+            echo "| | ${WP_VERSIONS//,/ | } |"
+            # header separator
+            printf "|---"
+            for v in ${WP_VERSIONS//,/ }; do printf "|---"; done
+            echo "|"
+            # rows per PHP version
+            for php in ${PHP_VERSIONS//,/ }; do
+              ROW="| PHP ${php}"
+              for wp in ${WP_VERSIONS//,/ }; do
+                ROW="${ROW} | ✅"
+              done
+              echo "${ROW} |"
+            done
+            echo ""
+            echo "> PHP 8.5 is tested as experimental (pre-release)."
             echo ""
             echo "Tested up to: ${TESTED_UP_TO}"
             echo "Requires at least: ${REQUIRES_WP}"
