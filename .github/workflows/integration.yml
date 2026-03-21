@@ -14,11 +14,15 @@ on:
       - 'composer.*'
       - '.github/workflows/integration.yml'
 
+permissions: {}
+
 jobs:
   integration:
     name: WP ${{ matrix.wp-version }} (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.php-version == '8.5' }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -155,6 +159,8 @@ jobs:
     name: Multisite (PHP ${{ matrix.php-version }} / WP ${{ matrix.wp-version }})
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.php-version == '8.5' }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:

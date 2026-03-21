@@ -18,11 +18,15 @@ on:
       - 'tests/**'
       - '.github/workflows/test.yml'
 
+permissions: {}
+
 jobs:
   test:
     name: PHP ${{ matrix.php-version }} / WP ${{ matrix.wp-version }}
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.php-version == '8.5' }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:

@@ -20,11 +20,15 @@ on:
       - 'phpmd-ruleset.xml'
       - 'phpcs.xml.dist'
 
+permissions: {}
+
 jobs:
   phpcs:
     name: PHPCS (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.php-version == '8.5' }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -78,6 +82,8 @@ jobs:
     name: PHPMD (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.php-version == '8.5' }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -117,6 +123,8 @@ jobs:
     name: PHPStan (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.php-version == '8.5' }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
