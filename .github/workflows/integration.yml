@@ -77,12 +77,39 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: Download and set up WordPress
+      - name: Cache WordPress tarball
+        uses: actions/cache@v5
+        id: wp-cache
+        with:
+          path: /tmp/wordpress-${{ matrix.wp-version }}.tar.gz
+          key: wordpress-${{ matrix.wp-version }}
+
+      - name: Download WordPress
+        if: steps.wp-cache.outputs.cache-hit != 'true'
         run: |
-          mkdir -p /tmp/wordpress
-          curl -sL "https://wordpress.org/wordpress-${{ matrix.wp-version }}.tar.gz" | tar xz -C /tmp/wordpress --strip-components=1
+          for i in 1 2 3; do
+            echo "Download attempt $i..."
+            curl --proto =https -fsSL -o /tmp/wordpress-${{ matrix.wp-version }}.tar.gz \
+              "https://wordpress.org/wordpress-${{ matrix.wp-version }}.tar.gz" && break
+            echo "Attempt $i failed, retrying in 5s..."
+            rm -f /tmp/wordpress-${{ matrix.wp-version }}.tar.gz
+            sleep 5
+          done
+          if [ ! -f /tmp/wordpress-${{ matrix.wp-version }}.tar.gz ]; then
+            echo "::error::Failed to download WordPress after 3 attempts"
+            exit 1
+          fi
+
+      - name: Extract WordPress
+        run: |
           mkdir -p wp-root
-          cp -r /tmp/wordpress/* wp-root/
+          if ! tar xzf /tmp/wordpress-${{ matrix.wp-version }}.tar.gz -C wp-root --strip-components=1; then
+            echo "Extraction failed — cached tarball may be corrupt, re-downloading..."
+            rm -f /tmp/wordpress-${{ matrix.wp-version }}.tar.gz
+            curl --proto =https -fsSL -o /tmp/wordpress-${{ matrix.wp-version }}.tar.gz \
+              "https://wordpress.org/wordpress-${{ matrix.wp-version }}.tar.gz"
+            tar xzf /tmp/wordpress-${{ matrix.wp-version }}.tar.gz -C wp-root --strip-components=1
+          fi
 
       - name: Configure WordPress
         working-directory: wp-root
@@ -202,10 +229,39 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: Download and set up WordPress Multisite
+      - name: Cache WordPress tarball
+        uses: actions/cache@v5
+        id: wp-cache
+        with:
+          path: /tmp/wordpress-${{ matrix.wp-version }}.tar.gz
+          key: wordpress-${{ matrix.wp-version }}
+
+      - name: Download WordPress
+        if: steps.wp-cache.outputs.cache-hit != 'true'
+        run: |
+          for i in 1 2 3; do
+            echo "Download attempt $i..."
+            curl --proto =https -fsSL -o /tmp/wordpress-${{ matrix.wp-version }}.tar.gz \
+              "https://wordpress.org/wordpress-${{ matrix.wp-version }}.tar.gz" && break
+            echo "Attempt $i failed, retrying in 5s..."
+            rm -f /tmp/wordpress-${{ matrix.wp-version }}.tar.gz
+            sleep 5
+          done
+          if [ ! -f /tmp/wordpress-${{ matrix.wp-version }}.tar.gz ]; then
+            echo "::error::Failed to download WordPress after 3 attempts"
+            exit 1
+          fi
+
+      - name: Extract WordPress for Multisite
         run: |
           mkdir -p wp-root
-          curl -sL "https://wordpress.org/wordpress-${{ matrix.wp-version }}.tar.gz" | tar xz -C wp-root --strip-components=1
+          if ! tar xzf /tmp/wordpress-${{ matrix.wp-version }}.tar.gz -C wp-root --strip-components=1; then
+            echo "Extraction failed — cached tarball may be corrupt, re-downloading..."
+            rm -f /tmp/wordpress-${{ matrix.wp-version }}.tar.gz
+            curl --proto =https -fsSL -o /tmp/wordpress-${{ matrix.wp-version }}.tar.gz \
+              "https://wordpress.org/wordpress-${{ matrix.wp-version }}.tar.gz"
+            tar xzf /tmp/wordpress-${{ matrix.wp-version }}.tar.gz -C wp-root --strip-components=1
+          fi
 
       - name: Configure WordPress Multisite
         working-directory: wp-root
