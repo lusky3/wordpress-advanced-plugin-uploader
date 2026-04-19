@@ -10,8 +10,11 @@ We recommend enabling the following branch protection rules on `main`:
 - **Require status checks to pass** before merging:
   - `phpcs` (lint workflow)
   - `phpstan` (lint workflow)
+  - `php-compat` (lint workflow — PHP compatibility check)
   - `test` (test workflow — at least PHP 8.3 / WP latest)
   - `composer-audit` (security workflow)
+  - `i18n` (i18n validation workflow)
+  - `license-check` (license compliance workflow)
 - **Require branches to be up to date** before merging
 - **Require conversation resolution** before merging
 - **Enforce conventional commits** in PR titles (use a CI check or PR title linter)

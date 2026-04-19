@@ -4,7 +4,7 @@ Tags: bulk, plugin, installer, upload, batch
 Requires at least: 5.8
 Tested up to: 6.9
 Requires PHP: 8.3
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -79,6 +79,23 @@ Yes. Deactivation only cleans up temporary data (queue transients and backup fil
 
 == Changelog ==
 
+= 1.0.2 =
+* Security: Input sanitization on profile save/import and plugin processor
+* Security: File path validation against bpi-tmp directory
+* Security: Symlink detection and zip bomb protection in ZIP validation
+* Fix: Rollback batch, save-as-profile, and delete-profile buttons now functional
+* Fix: Event handler stacking fixed with namespaced jQuery events
+* Fix: Dry run nonce mismatch resolved
+* Performance: ZIP opened once instead of 4x per upload
+* Performance: Deferred AJAX handler instantiation
+* Improvement: 12 extension points (do_action/apply_filters) for developers
+* Improvement: Client-side file size and queue limit validation
+* Improvement: Minified assets loaded in production (SCRIPT_DEBUG support)
+* Improvement: Hourly cron for expired backup cleanup
+* Improvement: Multisite capability checks on batch rollback and queue manager
+* Dev: Bumped minimum PHP to 8.3
+* Dev: Updated PHPUnit to 12.x
+
 = 1.0.1 =
 * Fix preview screen showing empty plugin names, versions, and authors
 * Modernize admin UI with card-based layout and improved visual design
@@ -97,6 +114,9 @@ Yes. Deactivation only cleans up temporary data (queue transients and backup fil
 * Activity logging
 
 == Upgrade Notice ==
+
+= 1.0.2 =
+Security hardening, bug fixes for rollback/profile buttons, performance improvements, and PHP 8.3 minimum.
 
 = 1.0.1 =
 Fixes empty preview data and modernizes the admin interface.

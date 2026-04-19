@@ -4,7 +4,7 @@
 [![Tests](../../actions/workflows/test.yml/badge.svg)](../../actions/workflows/test.yml)
 [![Security](../../actions/workflows/security.yml/badge.svg)](../../actions/workflows/security.yml)
 [![Integration](../../actions/workflows/integration.yml/badge.svg)](../../actions/workflows/integration.yml)
-[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.2-8892BF.svg)](https://php.net)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.3-8892BF.svg)](https://php.net)
 [![WordPress](https://img.shields.io/badge/wordpress-%3E%3D5.8-21759B.svg)](https://wordpress.org)
 [![License](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](../../pulls)
@@ -25,11 +25,12 @@ Upload and install multiple WordPress plugin ZIP files in a single operation wit
 - WordPress Multisite / Network Admin support
 - Activity logging with filterable log viewer
 - Configurable settings: auto-activate, max file size, rollback retention
+- Self-updating via GitHub Releases
 
 ## Requirements
 
 - WordPress 5.8 or later
-- PHP 8.2 or later
+- PHP 8.3 or later
 
 ## Installation
 
@@ -42,6 +43,8 @@ Or install via WP-CLI:
 ```bash
 wp plugin install bulk-plugin-installer.zip --activate
 ```
+
+The plugin checks GitHub for updates automatically and will notify you when a new version is available.
 
 ## Usage
 
@@ -85,10 +88,22 @@ php -d memory_limit=256M vendor/bin/phpunit --testsuite property
 
 ## Testing
 
-The test suite includes 458 tests with 60,000+ assertions:
+The test suite includes 480+ tests with 60,000+ assertions:
 
-- 17 unit test files covering all components
-- 30 property-based test files (using Eris) validating correctness invariants
+- Unit tests covering all components
+- Property-based tests (using Eris) validating correctness invariants
+
+## Hooks & Extension Points
+
+The plugin provides actions and filters for third-party developers:
+
+- `bpi_before_process_batch` / `bpi_after_process_batch` — batch lifecycle
+- `bpi_process_plugin_result` — filter individual plugin results
+- `bpi_before_batch_rollback` / `bpi_after_batch_rollback` — rollback lifecycle
+- `bpi_validate_zip` — add custom ZIP validation rules
+- `bpi_preview_items` — filter preview data before display
+- `bpi_batch_email_subject` / `bpi_batch_email_body` — customize notification emails
+- `bpi_rollback_email_subject` / `bpi_rollback_email_body` — customize rollback emails
 
 ## Contributing
 

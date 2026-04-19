@@ -33,7 +33,10 @@ This plugin follows WordPress security best practices:
 
 - All AJAX handlers verify nonces with `wp_verify_nonce()`
 - All endpoints check user capabilities with `current_user_can()`
-- File uploads are validated for ZIP format, path traversal, and size limits
+- Multisite-aware capability checks (`manage_network_plugins` in Network Admin)
+- File uploads are validated for ZIP format, path traversal, symlinks, and zip bombs
+- File paths validated against expected upload directory (prevents path traversal)
 - All user input is sanitized and escaped before output
 - Database queries use prepared statements via `$wpdb->prepare()`
 - No direct filesystem calls — operations use WordPress APIs
+- Uploaded plugin data sanitized per-field before processing
