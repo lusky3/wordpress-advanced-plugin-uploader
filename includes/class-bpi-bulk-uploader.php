@@ -345,7 +345,7 @@ class BPIBulkUploader {
         // Check for symbolic links via external attributes (Unix permissions).
         for ( $i = 0; $i < $zip->numFiles; $i++ ) {
             $stat = $zip->statIndex( $i );
-            $ext_attr = $stat['external_attr'] ?? 0; // @phpstan-ignore-line
+            $ext_attr = $stat['external_attr'] ?? 0;
             if ( $ext_attr && ( ( $ext_attr >> 16 ) & 0120000 ) === 0120000 ) {
                 return new \WP_Error( 'symlink_detected', __( 'The archive contains symbolic links and was rejected for security.', 'bulk-plugin-installer' ) );
             }
