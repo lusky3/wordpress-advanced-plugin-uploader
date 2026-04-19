@@ -1,0 +1,54 @@
+name: License Compliance
+
+on:
+  push:
+    branches: [main]
+    paths: ['composer.json', 'composer.lock']
+  pull_request:
+    branches: [main]
+    paths: ['composer.json', 'composer.lock']
+
+permissions:
+  contents: read
+
+jobs:
+  license-check:
+    name: Check Dependency Licenses
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Check licenses
+        run: |
+          # Get all dependency licenses
+          composer licenses --format=json > /tmp/licenses.json
+
+          # Define GPL-compatible licenses
+          ALLOWED='MIT|BSD-2-Clause|BSD-3-Clause|Apache-2.0|ISC|GPL-2.0-or-later|GPL-3.0-or-later|LGPL-2.1-or-later|LGPL-3.0-or-later'
+
+          # Check each dependency
+          FAILED=0
+          while IFS= read -r line; do
+            pkg=$(echo "$line" | jq -r '.name')
+            license=$(echo "$line" | jq -r '.license | join(", ")')
+            if ! echo "$license" | grep -qiE "$ALLOWED"; then
+              echo "::error::Package '$pkg' has non-GPL-compatible license: $license"
+              FAILED=1
+            fi
+          done < <(jq -c '.dependencies | to_entries[] | {name: .key, license: .value.license}' /tmp/licenses.json)
+
+          if [ $FAILED -eq 1 ]; then
+            exit 1
+          fi
+          echo "✅ All dependency licenses are GPL-compatible"

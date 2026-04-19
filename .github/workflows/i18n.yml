@@ -1,0 +1,44 @@
+name: i18n Validation
+
+on:
+  push:
+    branches: [main]
+    paths: ['**.php', 'languages/**']
+  pull_request:
+    branches: [main]
+    paths: ['**.php', 'languages/**']
+
+permissions:
+  contents: read
+
+jobs:
+  i18n:
+    name: Internationalization Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: wp-cli
+          coverage: none
+
+      - name: Generate POT and check for issues
+        run: |
+          mkdir -p languages
+          wp i18n make-pot . languages/bulk-plugin-installer.pot \
+            --slug=bulk-plugin-installer \
+            --domain=bulk-plugin-installer \
+            --exclude=tests,vendor,.github,.kiro \
+            --skip-js 2>&1 | tee pot-output.txt
+
+          # Check for text domain mismatches
+          if grep -r "__\(\|_e\(\|esc_html__\(\|esc_html_e\(\|esc_attr__\(\|esc_attr_e\(" includes/ bulk-plugin-installer.php | grep -v "'bulk-plugin-installer'" | grep -v "//" | grep -v "*"; then
+            echo "::error::Found strings with incorrect or missing text domain"
+            exit 1
+          fi
+
+          echo "✅ All translatable strings use the correct text domain"

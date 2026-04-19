@@ -1,0 +1,26 @@
+name: WP Plugin Check
+
+on:
+  push:
+    branches: [main]
+    paths: ['**.php', 'assets/**', 'readme.txt']
+  pull_request:
+    branches: [main]
+    paths: ['**.php', 'assets/**', 'readme.txt']
+
+permissions:
+  contents: read
+
+jobs:
+  plugin-check:
+    name: WordPress Plugin Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run WordPress Plugin Check
+        uses: WordPress/plugin-check-action@v1
+        with:
+          build-dir: '.'
+          wp-version: 'latest'

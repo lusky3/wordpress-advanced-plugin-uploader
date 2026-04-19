@@ -1,0 +1,49 @@
+name: JS & CSS Lint
+
+on:
+  push:
+    branches: [main]
+    paths: ['assets/**', '.eslintrc*', '.stylelintrc*', 'package.json']
+  pull_request:
+    branches: [main]
+    paths: ['assets/**', '.eslintrc*', '.stylelintrc*', 'package.json']
+
+permissions:
+  contents: read
+
+jobs:
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install ESLint with WordPress config
+        run: npm install --no-save eslint @wordpress/eslint-plugin
+
+      - name: Run ESLint
+        run: npx eslint assets/js/ --ext .js
+
+  stylelint:
+    name: Stylelint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Stylelint with WordPress config
+        run: npm install --no-save stylelint @wordpress/stylelint-config
+
+      - name: Run Stylelint
+        run: npx stylelint 'assets/css/**/*.css'

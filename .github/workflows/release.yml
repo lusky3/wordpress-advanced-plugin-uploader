@@ -30,6 +30,16 @@ jobs:
       - name: Install production dependencies
         run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Minify assets
+        run: |
+          npx terser assets/js/bpi-admin.js -o assets/js/bpi-admin.min.js --compress --mangle
+          npx csso-cli assets/css/bpi-admin.css -o assets/css/bpi-admin.min.css
+
       - name: Generate POT file
         run: |
           mkdir -p languages
@@ -73,6 +83,40 @@ jobs:
 
           cd /tmp/build
           zip -r "/tmp/${PLUGIN_DIR}-${{ steps.version.outputs.tag }}.zip" "${PLUGIN_DIR}/"
+
+      - name: Validate ZIP structure
+        run: |
+          TMPDIR=$(mktemp -d)
+          unzip /tmp/bulk-plugin-installer-${{ steps.version.outputs.tag }}.zip -d "$TMPDIR"
+
+          # Assert required files/dirs exist
+          for path in \
+            bulk-plugin-installer/bulk-plugin-installer.php \
+            bulk-plugin-installer/includes/ \
+            bulk-plugin-installer/assets/js/bpi-admin.min.js \
+            bulk-plugin-installer/assets/css/bpi-admin.min.css; do
+            [ -e "$TMPDIR/$path" ] || { echo "MISSING: $path"; exit 1; }
+          done
+
+          # Assert excluded paths do NOT exist
+          for path in .git tests/ .github/ node_modules/ composer.json composer.lock phpunit.xml .kiro/; do
+            if find "$TMPDIR" -name "$(basename $path)" | grep -q .; then
+              echo "UNEXPECTED: $path found in ZIP"; exit 1
+            fi
+          done
+
+          # Assert Plugin Name header
+          grep -q 'Plugin Name:' "$TMPDIR/bulk-plugin-installer/bulk-plugin-installer.php" || \
+            { echo "Missing 'Plugin Name:' header"; exit 1; }
+
+          rm -rf "$TMPDIR"
+          echo "ZIP structure validated successfully"
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: /tmp/build/bulk-plugin-installer
+          artifact-name: sbom-bulk-plugin-installer-${{ steps.version.outputs.tag }}.spdx.json
 
       - name: Generate changelog from commits
         id: changelog
@@ -130,6 +174,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: /tmp/changelog.md
-          files: /tmp/bulk-plugin-installer-${{ steps.version.outputs.tag }}.zip
+          files: |
+            /tmp/bulk-plugin-installer-${{ steps.version.outputs.tag }}.zip
+            sbom-bulk-plugin-installer-${{ steps.version.outputs.tag }}.spdx.json
           generate_release_notes: true
           fail_on_unmatched_files: true

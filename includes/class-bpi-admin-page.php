@@ -164,16 +164,18 @@ class BPIAdminPage {
             return;
         }
 
+        $suffix = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
         wp_enqueue_style(
             'bpi-admin',
-            BPI_PLUGIN_URL . 'assets/css/bpi-admin.css',
+            BPI_PLUGIN_URL . 'assets/css/bpi-admin' . $suffix . '.css',
             array(),
             BPI_VERSION
         );
 
         wp_enqueue_script(
             'bpi-admin',
-            BPI_PLUGIN_URL . 'assets/js/bpi-admin.js',
+            BPI_PLUGIN_URL . 'assets/js/bpi-admin' . $suffix . '.js',
             array( 'jquery' ),
             BPI_VERSION,
             true

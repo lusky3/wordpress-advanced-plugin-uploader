@@ -161,3 +161,36 @@ jobs:
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --no-progress
+
+  php-compat:
+    name: PHP Compatibility
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: cs2pr, composer
+          coverage: none
+
+      - name: Install PHPCompatibility
+        run: |
+          composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer global require --dev \
+            phpcompatibility/php-compatibility \
+            dealerdirect/phpcodesniffer-composer-installer
+
+      - name: Check PHP 8.2 compatibility
+        run: |
+          ~/.composer/vendor/bin/phpcs \
+            --standard=PHPCompatibility \
+            --runtime-set testVersion 8.2- \
+            --extensions=php \
+            --ignore=vendor/,tests/ \
+            -q --report=checkstyle \
+            includes/ bulk-plugin-installer.php uninstall.php | cs2pr
