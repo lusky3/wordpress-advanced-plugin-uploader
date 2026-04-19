@@ -1,0 +1,92 @@
+name: Accessibility
+
+on:
+  push:
+    branches: [main]
+    paths: ['assets/**', 'includes/class-bpi-admin-page.php', 'includes/class-bpi-settings-manager.php']
+  pull_request:
+    branches: [main]
+    paths: ['assets/**', 'includes/class-bpi-admin-page.php', 'includes/class-bpi-settings-manager.php']
+
+permissions:
+  contents: read
+
+jobs:
+  axe:
+    name: axe-core Accessibility Audit
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mysqli, zip, mbstring
+          tools: wp-cli
+          coverage: none
+
+      - name: Install WordPress
+        run: |
+          wp core download --path=/tmp/wordpress
+          wp config create --path=/tmp/wordpress \
+            --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1
+          wp core install --path=/tmp/wordpress \
+            --url=http://localhost:8080 --title=Test \
+            --admin_user=admin --admin_password=admin --admin_email=admin@example.com
+
+      - name: Install plugin
+        run: |
+          cp -r "$GITHUB_WORKSPACE" /tmp/wordpress/wp-content/plugins/bulk-plugin-installer
+          wp plugin activate bulk-plugin-installer --path=/tmp/wordpress
+
+      - name: Start PHP built-in server
+        run: |
+          php -S localhost:8080 -t /tmp/wordpress &
+          sleep 2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install axe-core CLI
+        run: npm install --no-save @axe-core/cli
+
+      - name: Login and get cookie
+        run: |
+          # Get login cookie for admin pages
+          curl -c /tmp/cookies.txt -d "log=admin&pwd=admin&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F" \
+            http://localhost:8080/wp-login.php -L -s -o /dev/null
+
+      - name: Run axe on Bulk Upload page
+        run: |
+          npx axe http://localhost:8080/wp-admin/plugins.php?page=bpi-bulk-upload \
+            --include "#bpi-bulk-upload-app,#bpi-bulk-upload-wrap" \
+            --tags wcag2a,wcag2aa,best-practice \
+            --exit \
+            --header "Cookie: $(cat /tmp/cookies.txt | grep wordpress_logged_in | awk '{print $6"="$7}')"
+
+      - name: Run axe on Settings page
+        run: |
+          npx axe http://localhost:8080/wp-admin/options-general.php?page=bpi-settings \
+            --include ".wrap" \
+            --tags wcag2a,wcag2aa,best-practice \
+            --exit \
+            --header "Cookie: $(cat /tmp/cookies.txt | grep wordpress_logged_in | awk '{print $6"="$7}')"
