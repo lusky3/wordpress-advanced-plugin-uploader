@@ -3,41 +3,43 @@ name: JS & CSS Lint
 on:
   push:
     branches: [main]
-    paths: ['assets/**', '.eslintrc*', '.stylelintrc*', 'package.json']
+    paths:
+      - 'assets/**'
+      - '.stylelintrc*'
   pull_request:
     branches: [main]
-    paths: ['assets/**', '.eslintrc*', '.stylelintrc*', 'package.json']
+    paths:
+      - 'assets/**'
+      - '.stylelintrc*'
 
 permissions:
   contents: read
 
 jobs:
   oxlint:
-    name: oxlint
+    name: OxLint (JS)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Run oxlint
-        uses: oxc-project/oxlint-action@v0
+      - uses: oxc-project/oxlint-action@v0
         with:
           args: assets/js/
 
   stylelint:
-    name: Stylelint
+    name: Stylelint (CSS)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/cache@v5
         with:
-          node-version: 20
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-stylelint-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-npm-stylelint-
 
-      - name: Install Stylelint with WordPress config
+      - name: Install Stylelint
         run: npm install --no-save stylelint @wordpress/stylelint-config
 
       - name: Run Stylelint
-        run: npx stylelint 'assets/css/**/*.css'
+        run: npx stylelint "assets/css/**/*.css"

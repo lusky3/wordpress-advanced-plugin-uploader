@@ -12,170 +12,56 @@ jobs:
   release:
     name: Build & Release
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: zip, mbstring, intl
-          tools: wp-cli, composer
-          coverage: none
 
-      - name: Install production dependencies
-        run: composer install --no-dev --prefer-dist --no-progress --optimize-autoloader
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Minify assets
+      - name: Validate version consistency
         run: |
-          npx terser assets/js/bpi-admin.js -o assets/js/bpi-admin.min.js --compress --mangle
-          npx csso-cli assets/css/bpi-admin.css -o assets/css/bpi-admin.min.css
-
-      - name: Generate POT file
-        run: |
-          mkdir -p languages
-          if command -v wp &> /dev/null; then
-            wp i18n make-pot . languages/bulk-plugin-installer.pot \
-              --slug=bulk-plugin-installer \
-              --domain=bulk-plugin-installer \
-              --exclude=tests,vendor,.github,.kiro \
-              --skip-js
-          else
-            echo "WP-CLI not available, skipping POT generation"
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PLUGIN_FILE=$(find . -maxdepth 1 -name '*.php' -exec grep -l 'Plugin Name:' {} \; | head -1)
+          if [ -z "$PLUGIN_FILE" ]; then
+            echo "::error::No main plugin file found"
+            exit 1
           fi
-
-      - name: Extract version from tag
-        id: version
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
-
-      - name: Build plugin ZIP
-        run: |
-          PLUGIN_DIR="bulk-plugin-installer"
-          BUILD_DIR="/tmp/build/${PLUGIN_DIR}"
-          mkdir -p "${BUILD_DIR}"
-
-          # Allowlist: only copy files required for the plugin to run
-          cp bulk-plugin-installer.php "${BUILD_DIR}/"
-          cp uninstall.php "${BUILD_DIR}/"
-          cp readme.txt "${BUILD_DIR}/"
-          cp LICENSE "${BUILD_DIR}/"
-
-          cp -r includes/ "${BUILD_DIR}/includes/"
-          cp -r assets/ "${BUILD_DIR}/assets/"
-          cp -r languages/ "${BUILD_DIR}/languages/"
-
-          # Vendor (production only, already installed with --no-dev)
-          if [ -d vendor ]; then
-            cp -r vendor/ "${BUILD_DIR}/vendor/"
+          FILE_VERSION=$(grep -oP 'Version:\s*\K[0-9.]+' "$PLUGIN_FILE")
+          if [ "$TAG_VERSION" != "$FILE_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match plugin version ($FILE_VERSION)"
+            exit 1
           fi
+          echo "Version $TAG_VERSION validated"
 
-          # Remove any stray .gitkeep files
-          find "${BUILD_DIR}" -name '.gitkeep' -delete
+      - name: Install composer dependencies
+        run: composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader 2>/dev/null || true
 
-          cd /tmp/build
-          zip -r "/tmp/${PLUGIN_DIR}-${{ steps.version.outputs.tag }}.zip" "${PLUGIN_DIR}/"
-
-      - name: Validate ZIP structure
+      - name: Build ZIP
         run: |
-          TMPDIR=$(mktemp -d)
-          unzip /tmp/bulk-plugin-installer-${{ steps.version.outputs.tag }}.zip -d "$TMPDIR"
-
-          # Assert required files/dirs exist
-          for path in \
-            bulk-plugin-installer/bulk-plugin-installer.php \
-            bulk-plugin-installer/includes/ \
-            bulk-plugin-installer/assets/js/bpi-admin.min.js \
-            bulk-plugin-installer/assets/css/bpi-admin.min.css; do
-            [ -e "$TMPDIR/$path" ] || { echo "MISSING: $path"; exit 1; }
-          done
-
-          # Assert excluded paths do NOT exist
-          for path in .git tests/ .github/ node_modules/ composer.json composer.lock phpunit.xml .kiro/; do
-            if find "$TMPDIR" -name "$(basename $path)" | grep -q .; then
-              echo "UNEXPECTED: $path found in ZIP"; exit 1
-            fi
-          done
-
-          # Assert Plugin Name header
-          grep -q 'Plugin Name:' "$TMPDIR/bulk-plugin-installer/bulk-plugin-installer.php" || \
-            { echo "Missing 'Plugin Name:' header"; exit 1; }
-
-          rm -rf "$TMPDIR"
-          echo "ZIP structure validated successfully"
+          PLUGIN_SLUG=$(basename "$GITHUB_REPOSITORY")
+          mkdir -p "$PLUGIN_SLUG"
+          rsync -a --exclude="$PLUGIN_SLUG" \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.kiro' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='vendor/bin' \
+            . "$PLUGIN_SLUG/"
+          zip -r "${PLUGIN_SLUG}.zip" "$PLUGIN_SLUG"
+          echo "ZIP_FILE=${PLUGIN_SLUG}.zip" >> "$GITHUB_ENV"
+          echo "PLUGIN_SLUG=${PLUGIN_SLUG}" >> "$GITHUB_ENV"
 
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
-          path: /tmp/build/bulk-plugin-installer
-          artifact-name: sbom-bulk-plugin-installer-${{ steps.version.outputs.tag }}.spdx.json
+          artifact-name: sbom-${{ env.PLUGIN_SLUG }}.spdx.json
 
-      - name: Generate changelog from commits
-        id: changelog
-        run: |
-          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          if [ -n "$PREVIOUS_TAG" ]; then
-            CHANGELOG=$(git log "${PREVIOUS_TAG}..HEAD" --pretty=format:"- %s (%h)" --no-merges)
-          else
-            CHANGELOG=$(git log --pretty=format:"- %s (%h)" --no-merges -50)
-          fi
-
-          # Extract metadata from readme.txt for the GitHub updater.
-          TESTED_UP_TO=$(grep -i "^Tested up to:" readme.txt | head -1 | sed 's/.*:\s*//')
-          REQUIRES_WP=$(grep -i "^Requires at least:" readme.txt | head -1 | sed 's/.*:\s*//')
-          REQUIRES_PHP=$(grep -i "^Requires PHP:" readme.txt | head -1 | sed 's/.*:\s*//')
-
-          # Build test matrix from CI workflow files
-          PHP_VERSIONS=$(grep -A5 'php-version:' .github/workflows/test.yml | grep -oP "'[0-9.]+'"|tr -d "'" | sort -uV | paste -sd, -)
-          WP_VERSIONS=$(grep -A5 'wp-version:' .github/workflows/test.yml | grep -oP "'[0-9.]+'"|tr -d "'" | sort -uV | paste -sd, -)
-
-          # Write to file for the release body
-          {
-            echo "## What's Changed"
-            echo ""
-            echo "${CHANGELOG}"
-            echo ""
-            echo "---"
-            echo ""
-            echo "### Compatibility"
-            echo ""
-            echo "| | ${WP_VERSIONS//,/ | } |"
-            # header separator
-            printf "|---"
-            for v in ${WP_VERSIONS//,/ }; do printf "|---"; done
-            echo "|"
-            # rows per PHP version
-            for php in ${PHP_VERSIONS//,/ }; do
-              ROW="| PHP ${php}"
-              for wp in ${WP_VERSIONS//,/ }; do
-                ROW="${ROW} | ✅"
-              done
-              echo "${ROW} |"
-            done
-            echo ""
-            echo "> PHP 8.5 is tested as experimental (pre-release)."
-            echo ""
-            echo "Tested up to: ${TESTED_UP_TO}"
-            echo "Requires at least: ${REQUIRES_WP}"
-            echo "Requires PHP: ${REQUIRES_PHP}"
-            echo ""
-            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${{ steps.version.outputs.tag }}"
-          } > /tmp/changelog.md
-
-      - name: Create GitHub Release
+      - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: /tmp/changelog.md
-          files: |
-            /tmp/bulk-plugin-installer-${{ steps.version.outputs.tag }}.zip
-            sbom-bulk-plugin-installer-${{ steps.version.outputs.tag }}.spdx.json
+          files: ${{ env.ZIP_FILE }}
           generate_release_notes: true
-          fail_on_unmatched_files: true

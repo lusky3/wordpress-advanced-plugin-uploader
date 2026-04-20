@@ -2,9 +2,7 @@
 
 <!-- Briefly describe the changes in this PR. -->
 
-## Related Issue
-
-<!-- Link to the issue this PR addresses, e.g. Fixes #123 -->
+Fixes # (issue)
 
 ## Type of Change
 
@@ -15,42 +13,23 @@
 - [ ] Documentation update
 - [ ] CI/CD change
 
-## Code Review Checklist
+## Testing
 
-### Tests
+- [ ] Manual test in WordPress Admin
+- [ ] Unit tests pass
+- [ ] PHP linting passes
+- [ ] Plugin activates without errors on PHP 8.2+
 
-- [ ] All existing tests pass (`vendor/bin/phpunit`)
-- [ ] New unit tests added for new functionality
-- [ ] Property-based tests added where applicable
-- [ ] Edge cases are covered
+## Checklist
 
-### Coding Standards
+- [ ] Code follows WordPress Coding Standards
+- [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
+- [ ] All AJAX handlers verify nonce and check capabilities
+- [ ] User-facing strings use translation functions with correct text domain
+- [ ] No debug code left in (`var_dump`, `error_log`, `console.log`)
+- [ ] Self-reviewed my own code
 
-- [ ] Code follows WordPress Coding Standards (PHPCS passes)
-- [ ] PHPStan passes at level 5
-- [ ] No new PHPMD warnings introduced
+## AI Usage
 
-### Security
-
-- [ ] All AJAX handlers verify nonce with `wp_verify_nonce()`
-- [ ] All AJAX handlers check capabilities with `current_user_can()`
-- [ ] File operations use `WP_Filesystem` API (no direct `file_put_contents` / `unlink`)
-- [ ] No path traversal vulnerabilities introduced
-- [ ] User input is sanitized and validated
-
-### Internationalization
-
-- [ ] All user-facing strings use `__()` / `_e()` / `esc_html__()` with `bulk-plugin-installer` text domain
-- [ ] No hardcoded English strings in PHP output
-
-### Accessibility
-
-- [ ] Interactive elements have ARIA labels
-- [ ] UI changes are keyboard navigable
-- [ ] Status changes use ARIA live regions
-
-### General
-
-- [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
-- [ ] No debug code or `var_dump` / `error_log` left in
-- [ ] Documentation updated if needed
+- [ ] AI (LLM) was used to assist in generating parts of this code
+- [ ] All AI-generated portions have been reviewed and tested

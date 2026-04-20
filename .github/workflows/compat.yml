@@ -1,0 +1,59 @@
+name: PHP/WP Compatibility
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  compat:
+    name: PHP ${{ matrix.php }} / WP ${{ matrix.wp }}
+    runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.php == '8.4' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+        wp: ['6.7', '6.8', 'latest']
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: wordpress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli
+          tools: wp-cli
+
+      - name: Install WordPress
+        run: |
+          wp core download --version=${{ matrix.wp }} --path=/tmp/wordpress
+          wp config create --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1 --path=/tmp/wordpress
+          wp core install --url=localhost --title=Test --admin_user=admin --admin_password=admin --admin_email=test@example.com --path=/tmp/wordpress
+
+      - name: Symlink and activate plugin
+        run: |
+          PLUGIN_SLUG=$(basename "$GITHUB_REPOSITORY")
+          ln -s "$GITHUB_WORKSPACE" "/tmp/wordpress/wp-content/plugins/$PLUGIN_SLUG"
+          wp plugin activate "$PLUGIN_SLUG" --path=/tmp/wordpress
+
+      - name: Check for fatal errors
+        run: |
+          wp eval 'echo "WordPress loaded successfully";' --path=/tmp/wordpress
+          wp plugin list --path=/tmp/wordpress --status=active

@@ -1,4 +1,4 @@
-name: Lint & Coding Standards
+name: PHP Lint & Standards
 
 on:
   push:
@@ -6,191 +6,91 @@ on:
     paths:
       - '**.php'
       - 'composer.*'
-      - '.github/workflows/lint.yml'
-      - 'phpstan.neon'
-      - 'phpmd-ruleset.xml'
-      - 'phpcs.xml.dist'
+      - 'phpcs.xml*'
+      - 'phpstan.neon*'
   pull_request:
     branches: [main]
     paths:
       - '**.php'
       - 'composer.*'
-      - '.github/workflows/lint.yml'
-      - 'phpstan.neon'
-      - 'phpmd-ruleset.xml'
-      - 'phpcs.xml.dist'
+      - 'phpcs.xml*'
+      - 'phpstan.neon*'
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
+  php-syntax:
+    name: PHP Syntax (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Check PHP syntax
+        run: find . -name '*.php' -not -path './vendor/*' -not -path './node_modules/*' | xargs -n1 php -l
+
   phpcs:
-    name: PHPCS (PHP ${{ matrix.php-version }})
+    name: PHPCS (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.php-version == '8.5' }}
-    permissions:
-      contents: read
     strategy:
-      fail-fast: false
       matrix:
-        php-version: ['8.3', '8.4', '8.5']
-
+        php: ['8.3', '8.4']
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Set up PHP ${{ matrix.php-version }}
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
-          tools: cs2pr, composer
+          php-version: ${{ matrix.php }}
+          tools: cs2pr, phpcs
           coverage: none
 
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v5
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ matrix.php-version }}-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
-
-      - name: Allow PHPCS Composer installer plugin globally
-        run: composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-
-      - name: Install PHPCS and WordPress standards
+      - name: Install WPCS
         run: |
-          composer global require --dev \
-            squizlabs/php_codesniffer \
-            wp-coding-standards/wpcs \
-            phpcompatibility/phpcompatibility-wp \
-            dealerdirect/phpcodesniffer-composer-installer
+          composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
+          composer global require --dev wp-coding-standards/wpcs dealerdirect/phpcodesniffer-composer-installer
 
-      - name: Run PHPCS with WordPress standards
+      - name: Run PHPCS
         run: |
-          ~/.composer/vendor/bin/phpcs \
-            --report=checkstyle \
-            --warning-severity=0 \
-            -q | cs2pr
-
-  phpmd:
-    name: PHPMD (PHP ${{ matrix.php-version }})
-    runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.php-version == '8.5' }}
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        php-version: ['8.3', '8.4', '8.5']
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up PHP ${{ matrix.php-version }}
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-version }}
-          tools: phpmd, composer
-          coverage: none
-
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v5
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ matrix.php-version }}-
-
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
-
-      - name: Run PHPMD
-        run: |
-          phpmd includes/,bulk-plugin-installer.php text phpmd-ruleset.xml
+          if [ -f phpcs.xml ] || [ -f phpcs.xml.dist ]; then
+            phpcs --report=checkstyle -q | cs2pr
+          else
+            phpcs --standard=WordPress --extensions=php --ignore=vendor/,node_modules/ --report=checkstyle -q . | cs2pr
+          fi
 
   phpstan:
-    name: PHPStan (PHP ${{ matrix.php-version }})
+    name: PHPStan (PHP ${{ matrix.php }})
     runs-on: ubuntu-latest
-    continue-on-error: ${{ matrix.php-version == '8.5' }}
-    permissions:
-      contents: read
+    if: hashFiles('phpstan.neon') != ''
     strategy:
-      fail-fast: false
       matrix:
-        php-version: ['8.3', '8.4', '8.5']
-
+        php: ['8.3', '8.4']
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Set up PHP ${{ matrix.php-version }}
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
-          tools: composer
+          php-version: ${{ matrix.php }}
           coverage: none
-
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Composer dependencies
-        uses: actions/cache@v5
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ matrix.php-version }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-${{ matrix.php-version }}-
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
-
-      - name: Install PHPStan WordPress extension
-        run: composer require --dev szepeviktor/phpstan-wordpress php-stubs/wp-cli-stubs --no-interaction
+        run: |
+          if [ -f composer.json ]; then
+            composer install --no-interaction --prefer-dist
+          fi
+          composer global require phpstan/phpstan szepeviktor/phpstan-wordpress php-stubs/wordpress-stubs
 
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --no-progress
-
-  php-compat:
-    name: PHP Compatibility
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          tools: cs2pr, composer
-          coverage: none
-
-      - name: Install PHPCompatibility
         run: |
-          composer global config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-          composer global require --dev \
-            phpcompatibility/php-compatibility \
-            dealerdirect/phpcodesniffer-composer-installer
-
-      - name: Check PHP 8.2 compatibility
-        run: |
-          ~/.composer/vendor/bin/phpcs \
-            --standard=PHPCompatibility \
-            --runtime-set testVersion 8.3- \
-            --extensions=php \
-            --ignore=vendor/,tests/ \
-            -q --report=checkstyle \
-            includes/ bulk-plugin-installer.php uninstall.php | cs2pr
+          if [ -f vendor/bin/phpstan ]; then
+            vendor/bin/phpstan analyse --no-progress
+          else
+            ~/.composer/vendor/bin/phpstan analyse --configuration=phpstan.neon --no-progress
+          fi

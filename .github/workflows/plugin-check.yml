@@ -1,29 +1,28 @@
-name: WP Plugin Check
+name: WordPress Plugin Check
 
 on:
   push:
     branches: [main]
-    paths: ['**.php', 'assets/**', 'readme.txt']
+    paths:
+      - '**.php'
+      - 'assets/**'
+      - 'readme.txt'
   pull_request:
     branches: [main]
-    paths: ['**.php', 'assets/**', 'readme.txt']
+    paths:
+      - '**.php'
+      - 'assets/**'
+      - 'readme.txt'
 
 permissions:
   contents: read
 
 jobs:
   plugin-check:
-    name: WordPress Plugin Check
+    name: Plugin Check
     runs-on: ubuntu-latest
-    # Informational only — this plugin is distributed via GitHub, not wordpress.org.
-    # Text domain mismatch (repo name vs plugin slug) is expected.
     continue-on-error: true
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Run WordPress Plugin Check
-        uses: WordPress/plugin-check-action@v1
-        with:
-          build-dir: '.'
-          wp-version: 'latest'
+      - uses: wordpress/plugin-check-action@v1

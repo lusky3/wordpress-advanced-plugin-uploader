@@ -1,7 +1,6 @@
 version: 2
 
 updates:
-  # GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -9,7 +8,6 @@ updates:
       day: "monday"
     labels:
       - "dependencies"
-      - "automated"
     commit-message:
       prefix: "ci"
     groups:
@@ -20,7 +18,6 @@ updates:
           - "minor"
           - "patch"
 
-  # Composer (PHP dependencies)
   - package-ecosystem: "composer"
     directory: "/"
     schedule:
@@ -28,7 +25,6 @@ updates:
       day: "monday"
     labels:
       - "dependencies"
-      - "automated"
     commit-message:
       prefix: "build"
     groups:

@@ -4,15 +4,15 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.x     | :white_check_mark: |
+| Latest  | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Bulk Plugin Installer, please report it responsibly.
+If you discover a security vulnerability, please report it responsibly.
 
 **Do not open a public GitHub issue for security vulnerabilities.**
 
-Instead, please email the maintainers directly at the email address listed in the plugin header or use [GitHub's private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability).
+Instead, please use [GitHub's private vulnerability reporting](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability) feature. You can find the "Report a vulnerability" button under the Security tab of this repository.
 
 ### What to include
 
@@ -33,10 +33,6 @@ This plugin follows WordPress security best practices:
 
 - All AJAX handlers verify nonces with `wp_verify_nonce()`
 - All endpoints check user capabilities with `current_user_can()`
-- Multisite-aware capability checks (`manage_network_plugins` in Network Admin)
-- File uploads are validated for ZIP format, path traversal, symlinks, and zip bombs
-- File paths validated against expected upload directory (prevents path traversal)
 - All user input is sanitized and escaped before output
 - Database queries use prepared statements via `$wpdb->prepare()`
-- No direct filesystem calls — operations use WordPress APIs
-- Uploaded plugin data sanitized per-field before processing
+- Direct file access is prevented with `if ( ! defined( 'ABSPATH' ) ) exit;`

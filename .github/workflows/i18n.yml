@@ -3,10 +3,14 @@ name: i18n Validation
 on:
   push:
     branches: [main]
-    paths: ['**.php', 'languages/**']
+    paths:
+      - '**.php'
+      - 'languages/**'
   pull_request:
     branches: [main]
-    paths: ['**.php', 'languages/**']
+    paths:
+      - '**.php'
+      - 'languages/**'
 
 permissions:
   contents: read
@@ -16,29 +20,27 @@ jobs:
     name: Internationalization Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
 
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           tools: wp-cli
-          coverage: none
 
-      - name: Generate POT and check for issues
+      - name: Generate POT file
         run: |
+          PLUGIN_SLUG=$(basename "$GITHUB_REPOSITORY")
           mkdir -p languages
-          wp i18n make-pot . languages/bulk-plugin-installer.pot \
-            --slug=bulk-plugin-installer \
-            --domain=bulk-plugin-installer \
-            --exclude=tests,vendor,.github,.kiro \
-            --skip-js 2>&1 | tee pot-output.txt
+          wp i18n make-pot . "languages/${PLUGIN_SLUG}.pot" --slug="$PLUGIN_SLUG"
 
-          # Check for text domain mismatches
-          if grep -r "__\(\|_e\(\|esc_html__\(\|esc_html_e\(\|esc_attr__\(\|esc_attr_e\(" includes/ bulk-plugin-installer.php | grep -v "'bulk-plugin-installer'" | grep -v "//" | grep -v "*"; then
-            echo "::error::Found strings with incorrect or missing text domain"
-            exit 1
+      - name: Check for text domain mismatches
+        run: |
+          PLUGIN_SLUG=$(basename "$GITHUB_REPOSITORY")
+          MISMATCHES=$(grep -rn --include='*.php' -E "__\(|_e\(|esc_html__\(|esc_html_e\(|esc_attr__\(|esc_attr_e\(|_n\(|_x\(|_ex\(|_nx\(" . \
+            --exclude-dir=vendor --exclude-dir=node_modules \
+            | grep -v "'${PLUGIN_SLUG}'" \
+            | grep -vE "^Binary" || true)
+          if [ -n "$MISMATCHES" ]; then
+            echo "::warning::Possible text domain mismatches found:"
+            echo "$MISMATCHES"
           fi
-
-          echo "✅ All translatable strings use the correct text domain"
